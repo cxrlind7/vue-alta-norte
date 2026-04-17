@@ -199,8 +199,8 @@ async function enviarPorCorreo() {
         const blob     = buildPdfBlob()
         const filename = `cotizacion-alta-norte-${props.manzana}-lote${props.lote.lote}.pdf`
         const file     = new File([blob], filename, { type: 'application/pdf' })
-        const subject  = `Cotización Alta Norte – Sección ${props.manzana} Lote ${props.lote.lote} – ${clienteNombre.value}`
-        const body     = `Estimado/a ${clienteNombre.value},\n\nAdjunto encontrará la cotización para el lote solicitado:\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual: ${fmt(montoPago.value)}\n\nQuedo en espera de su confirmación.\n\nSaludos,\nEquipo Alta Norte`
+        const subject  = `Solicitud de información – Sección ${props.manzana} Lote ${props.lote.lote}`
+        const body     = `Hola, equipo de Alta Norte.\n\nMe interesa obtener más información sobre el siguiente lote:\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total estimado: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual estimado: ${fmt(montoPago.value)}\n\nQuedo en espera de su contacto.\n\nSaludos,\n${clienteNombre.value}`
 
         const to = import.meta.env.VITE_CONTACT_EMAIL || ''
 

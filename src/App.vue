@@ -23,7 +23,21 @@
   <AdminLogin v-if="showAdminLogin" @success="showAdminLogin = false" />
 
   <!-- Admin view: cotizador only -->
-  <div v-if="isAdminRoute && !showAdminLogin" class="min-h-screen bg-gray-50">
+  <div v-else-if="isAdmin" class="min-h-screen bg-gray-50">
+    <!-- Admin top bar -->
+    <div class="w-full bg-slate-900 px-6 py-3 flex items-center justify-between">
+      <span class="text-white text-sm font-semibold tracking-wide">Alta Norte — Admin</span>
+      <button
+        class="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
+        @click="logout"
+      >
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Cerrar sesión
+      </button>
+    </div>
     <PlansSection />
   </div>
 
@@ -85,9 +99,9 @@ import ContactSection from './components/ContactSection.vue'
 import AppFooter from './components/AppFooter.vue'
 
 const { tourOpen } = useTourState()
-const { isAdmin }  = useAdminState()
+const { isAdmin, logout } = useAdminState()
 
-const isAdminRoute  = window.location.pathname === '/admin'
+const isAdminRoute   = window.location.pathname === '/admin'
 const showAdminLogin = ref(isAdminRoute && !isAdmin.value)
 
 const loading = ref(true)
