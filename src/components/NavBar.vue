@@ -66,7 +66,7 @@
                    hover:scale-105 hover:shadow-elegant-lg
                    focus:outline-none focus:ring-4 focus:ring-primary/30
                    group relative overflow-hidden"
-            @click="scrollTo('#contacto')"
+            @click="scrollTo('#planos')"
           >
             <div class="absolute inset-0 bg-gradient-elegant from-secondary to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
             <span class="relative z-10">COTIZAR</span>
