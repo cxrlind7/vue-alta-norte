@@ -2,6 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import Panzoom from '@panzoom/panzoom'
 import { useLotes, refreshReservations } from '../composables/useLotes.js'
+import { useAdminState } from '../composables/useAdminState.js'
 import CotizacionModal from './CotizacionModal.vue'
 
 const MAP_W = 1123
@@ -18,6 +19,7 @@ const props = defineProps({
 const emit = defineEmits(['select-lot'])
 
 const { lotes, loading } = useLotes()
+const { isAdmin } = useAdminState()
 
 const containerRef    = ref(null)
 const panzoomRef      = ref(null)
@@ -31,6 +33,29 @@ let fitPanY  = 0
 
 const hoveredLote  = ref(null)
 const calloutStyle = ref({ left: '50%', top: '45%' })
+
+let _dragOffset = { x: 0, y: 0 }
+
+function startDrag(e) {
+  e.preventDefault()
+  const left = parseInt(calloutStyle.value.left)
+  const top  = parseInt(calloutStyle.value.top)
+  _dragOffset = { x: e.clientX - left, y: e.clientY - top }
+  document.addEventListener('mousemove', onDrag)
+  document.addEventListener('mouseup', stopDrag)
+}
+
+function onDrag(e) {
+  calloutStyle.value = {
+    left: (e.clientX - _dragOffset.x) + 'px',
+    top : (e.clientY - _dragOffset.y) + 'px',
+  }
+}
+
+function stopDrag() {
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', stopDrag)
+}
 
 const showCotizacion    = ref(false)
 const cotizacionLote    = ref(null)
@@ -174,6 +199,13 @@ function handleClick(e) {
 
   const el = e.target.closest('[data-manzana]')
   if (!el) { hoveredLote.value = null; return }
+  if (isAdmin.value) {
+    const mzKey     = el.getAttribute('data-manzana')
+    const loteIndex = parseInt(el.getAttribute('data-lote-index') || '1')
+    const lotData   = (lotes.value[mzKey] || [])[loteIndex - 1]
+    if (lotData) emit('select-lot', { manzana: `MANZANA_${mzKey}`, loteIndex: lotData.lote })
+    return
+  }
 
   const mzKey     = el.getAttribute('data-manzana')
   const loteIndex = parseInt(el.getAttribute('data-lote-index') || '1')
@@ -195,6 +227,7 @@ function handleClick(e) {
 }
 
 function clearHover() { hoveredLote.value = null }
+
 
 function handleContainerClick(e) {
   if (e.target === containerRef.value || e.target === panzoomRef.value) clearHover()
@@ -348,7 +381,8 @@ function fmtArea(v) {
           :style="{ left: calloutStyle.left, top: calloutStyle.top }"
         >
           <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-900 to-slate-900 px-4 py-3 flex items-start justify-between">
+            <div class="bg-gradient-to-r from-blue-900 to-slate-900 px-4 py-3 flex items-start justify-between select-none"
+              style="cursor:grab;" @mousedown.stop="startDrag">
               <div>
                 <p class="text-blue-300 text-[10px] font-bold uppercase tracking-widest">Lote Seleccionado</p>
                 <p class="text-white text-lg font-extrabold leading-tight">

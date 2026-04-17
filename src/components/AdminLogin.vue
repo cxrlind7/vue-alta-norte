@@ -48,7 +48,7 @@ const error    = ref(false)
 function submit() {
   error.value = false
   if (login(password.value)) {
-    emit('success')
+    window.location.reload()
   } else {
     error.value = true
     password.value = ''

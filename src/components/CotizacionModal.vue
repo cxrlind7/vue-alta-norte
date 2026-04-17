@@ -14,11 +14,16 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm'])
 
-const clienteNombre = ref('PÚBLICO GENERAL')
+const clienteNombre = ref('')
+const clienteTelefono = ref('')
 const enganchePct = ref(20)
 const plazoMeses = ref(24)
 
 const PLAZO_OPCIONES = [6, 12, 18, 24, 36, 48, 60]
+
+const formularioInvalido = computed(() =>
+    !clienteNombre.value.trim() || clienteTelefono.value.length !== 10
+)
 
 const precioTotal = computed(() =>
     props.lote ? props.lote.superficie * props.lote.precio : 0
@@ -115,6 +120,8 @@ function imprimirCotizacion() {
     setTimeout(() => { w.print(); w.close() }, 500)
 }
 
+const enviandoCorreo = ref(false)
+
 function buildPdfBlob() {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const W   = doc.internal.pageSize.getWidth()
@@ -190,18 +197,25 @@ function buildPdfBlob() {
 }
 
 function enviarPorCorreo() {
-    if (!props.lote) return
-    const to      = import.meta.env.VITE_CONTACT_EMAIL || ''
-    const subject = `Solicitud – Sección ${props.manzana} Lote ${props.lote.lote}`
-    const body    = `Hola Alta Norte,\n\nMe interesa el Lote ${props.lote.lote}, Sección ${props.manzana} (${fmtArea(props.lote.superficie)} m²).\nPrecio estimado: ${fmt(precioTotal.value)}.\n\nSaludos,\n${clienteNombre.value}`
+    if (!props.lote || formularioInvalido.value) return
 
-    window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    const to      = import.meta.env.VITE_CONTACT_EMAIL || ''
+    const subject = `Interés de compra – Sección ${props.manzana} Lote ${props.lote.lote} – ${clienteNombre.value}`
+    const body    = `Hola equipo de Alta Norte,\n\nMi nombre es ${clienteNombre.value} y estoy interesado/a en adquirir el siguiente lote. Por favor contáctenme para continuar con el proceso.\n\nTELÉFONO: ${clienteTelefono.value}\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual: ${fmt(montoPago.value)}\n\nQuedo en espera de su contacto.\n\n${clienteNombre.value}`
+
+    const link = document.createElement('a')
+    link.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
 }
 
 watch(() => props.lote, () => {
     enganchePct.value = 20
     plazoMeses.value = 24
-    clienteNombre.value = 'PÚBLICO GENERAL'
+    clienteNombre.value = ''
+    clienteTelefono.value = ''
 })
 </script>
 
@@ -231,11 +245,22 @@ watch(() => props.lote, () => {
 
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label
-                                    class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Cliente</label>
+                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Nombre Completo *</label>
                                 <input v-model="clienteNombre"
                                     class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Nombre del cliente" />
+                                    placeholder="Tu nombre completo" />
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Teléfono * (10 dígitos)</label>
+                                <input
+                                    :value="clienteTelefono"
+                                    @keydown="!/^\d$/.test($event.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab'].includes($event.key) && $event.preventDefault()"
+                                    @input="clienteTelefono = $event.target.value = $event.target.value.replace(/\D/g, '').slice(0, 10)"
+                                    inputmode="numeric"
+                                    maxlength="10"
+                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    :class="{ 'border-red-400': clienteTelefono.length > 0 && clienteTelefono.length !== 10 }"
+                                    placeholder="10 dígitos" />
                             </div>
                             <div>
                                 <label
@@ -303,12 +328,11 @@ watch(() => props.lote, () => {
                                     <tbody>
                                         <tr v-for="row in tablaDePageos" :key="row.no"
                                             class="border-b border-slate-50 even:bg-slate-50">
-                                            <td class="py-1.5 px-3 text-center font-semibold">{{ row.no }}</td>
+                                            <td class="py-1.5 px-3 text-center font-semibold text-slate-700">{{ row.no }}</td>
                                             <td class="py-1.5 px-3 text-right text-slate-500">{{ row.fecha }}</td>
-                                            <td class="py-1.5 px-3 text-right font-mono">{{ fmt(row.saldoInicial) }}</td>
-                                            <td class="py-1.5 px-3 text-right font-mono text-blue-700 font-semibold">{{
-                                                fmt(row.monto) }}</td>
-                                            <td class="py-1.5 px-3 text-right font-mono">{{ fmt(row.saldoFinal) }}</td>
+                                            <td class="py-1.5 px-3 text-right font-mono text-slate-600">{{ fmt(row.saldoInicial) }}</td>
+                                            <td class="py-1.5 px-3 text-right font-mono text-blue-700 font-semibold">{{ fmt(row.monto) }}</td>
+                                            <td class="py-1.5 px-3 text-right font-mono text-slate-600">{{ fmt(row.saldoFinal) }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -361,13 +385,13 @@ watch(() => props.lote, () => {
                         </div>
 
                         <div class="space-y-2 mt-auto">
-                            <button @click="enviarPorCorreo"
-                                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow">
+                            <button @click="enviarPorCorreo" :disabled="formularioInvalido"
+                                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow">
                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                Enviar Correo
+                                Enviar por Correo
                             </button>
                             <button @click="imprimirCotizacion"
                                 class="w-full py-2.5 border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm">

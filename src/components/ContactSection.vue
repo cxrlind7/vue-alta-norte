@@ -111,17 +111,21 @@
 
               <!-- Phone -->
               <div class="space-y-3">
-                <label for="phone" class="block text-sm font-semibold text-white tracking-wide">Teléfono</label>
+                <label for="phone" class="block text-sm font-semibold text-white tracking-wide">Teléfono * (10 dígitos)</label>
                 <input
-                  type="tel"
                   id="phone"
-                  v-model="form.phone"
+                  :value="form.phone"
+                  @keydown="!/^\d$/.test($event.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab'].includes($event.key) && $event.preventDefault()"
+                  @input="form.phone = $event.target.value = $event.target.value.replace(/\D/g, '').slice(0, 10)"
+                  inputmode="numeric"
+                  maxlength="10"
+                  required
                   class="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-xl
                          text-white placeholder-neutral-400
                          focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50
                          transition-all duration-300 hover:bg-white/15 hover:border-white/30
                          backdrop-blur-sm"
-                  placeholder="+52 000 000 0000"
+                  placeholder="10 dígitos"
                 />
               </div>
 
@@ -224,8 +228,8 @@ function showNotification(message, type) {
 }
 
 function handleSubmit() {
-  if (!form.name || !form.email || !form.message) {
-    showNotification('Por favor completa todos los campos requeridos', 'error')
+  if (!form.name || !form.email || !form.message || form.phone.length !== 10) {
+    showNotification('Por favor completa todos los campos requeridos (teléfono: 10 dígitos)', 'error')
     return
   }
   submitting.value = true

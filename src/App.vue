@@ -29,7 +29,7 @@
       <span class="text-white text-sm font-semibold tracking-wide">Alta Norte — Admin</span>
       <button
         class="flex items-center gap-2 text-sm text-white/70 hover:text-white transition-colors"
-        @click="logout"
+        @click="handleLogout"
       >
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -100,6 +100,11 @@ import AppFooter from './components/AppFooter.vue'
 
 const { tourOpen } = useTourState()
 const { isAdmin, logout } = useAdminState()
+
+function handleLogout() {
+  logout()
+  window.location.href = '/'
+}
 
 const isAdminRoute   = window.location.pathname === '/admin'
 const showAdminLogin = ref(isAdminRoute && !isAdmin.value)
