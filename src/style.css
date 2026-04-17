@@ -1,0 +1,577 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Amble Font Face Declarations ---- */
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-light-webfont.woff2') format('woff2'),
+       url('/fonts/amble-light-webfont.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-lightitalic-webfont.woff2') format('woff2'),
+       url('/fonts/amble-lightitalic-webfont.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-lightcondensed-webfont.woff2') format('woff2'),
+       url('/fonts/amble-lightcondensed-webfont.woff') format('woff');
+  font-weight: 300;
+  font-style: normal;
+  font-stretch: condensed;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-lightcondenseditalic-webfont.woff2') format('woff2'),
+       url('/fonts/amble-lightcondenseditalic-webfont.woff') format('woff');
+  font-weight: 300;
+  font-style: italic;
+  font-stretch: condensed;
+  font-display: swap;
+}
+
+/* Amble Regular (weight 400) — mapped to the light face as the site does */
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-light-webfont.woff2') format('woff2'),
+       url('/fonts/amble-light-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-italic-webfont.woff2') format('woff2'),
+       url('/fonts/amble-italic-webfont.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-bold-webfont.woff2') format('woff2'),
+       url('/fonts/amble-bold-webfont.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amble';
+  src: url('/fonts/amble-bolditalic-webfont.woff2') format('woff2'),
+       url('/fonts/amble-bolditalic-webfont.woff') format('woff');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ---- Base Styles ---- */
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #061717;
+}
+
+body {
+  font-family: 'Amble', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #061717, #0d1518, #272831);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #fff;
+  overflow-x: hidden;
+}
+
+/* ---- Headings ---- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', 'Amble', serif;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  color: #fff;
+}
+
+/* ---- Default Link Styles ---- */
+a {
+  color: #d4d4d4;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+a:hover {
+  color: #fff;
+}
+
+/* ---- Default Paragraph Styles ---- */
+p {
+  text-wrap: pretty;
+  color: #d4d4d4;
+  line-height: 1.7;
+}
+
+/* ---- Global Transition ---- */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-duration: 0.3s;
+}
+
+/* ---- Selection ---- */
+::-moz-selection {
+  background-color: rgba(42, 55, 41, 0.4);
+  color: #fff;
+}
+::selection {
+  background-color: rgba(42, 55, 41, 0.4);
+  color: #fff;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #061717;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #2a3729, #265143);
+  border-radius: 6px;
+  border: 2px solid #061717;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #1e2a1e, #1d3e33);
+  border-color: #0d1518;
+}
+
+::-webkit-scrollbar-corner {
+  background: #061717;
+}
+
+/* ---- Focus Visible ---- */
+*:focus-visible {
+  outline: 3px solid #2a3729;
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+button:focus-visible {
+  outline: 3px solid #2a3729;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(42, 55, 41, 0.2);
+}
+
+/* ---- Input / Textarea / Select base ---- */
+input, textarea, select {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
+  padding: 12px 16px;
+  transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #2a3729;
+  box-shadow: 0 0 0 3px rgba(42, 55, 41, 0.2);
+}
+
+input::placeholder, textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ---- Data Animate ---- */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(80px);
+  transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+[data-animate].animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-animate-delay] {
+  opacity: 0;
+  transform: translateY(60px);
+  transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+[data-animate-delay].animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+[data-animate-delay="100"] { transition-delay: 0.1s; }
+[data-animate-delay="200"] { transition-delay: 0.2s; }
+[data-animate-delay="300"] { transition-delay: 0.3s; }
+[data-animate-delay="400"] { transition-delay: 0.4s; }
+
+/* ---- Custom Utilities ---- */
+.bg-gradient-elegant {
+  background-image: linear-gradient(135deg, var(--tw-gradient-stops));
+}
+
+.bg-gradient-radial {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
+
+.shadow-elegant {
+  box-shadow: 0 4px 20px rgba(42, 55, 41, 0.15);
+}
+
+.shadow-elegant-lg {
+  box-shadow: 0 10px 40px rgba(42, 55, 41, 0.25);
+}
+
+.shadow-luxury {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-luxury-lg {
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.ease-elegant {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ---- Glass Effects ---- */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ---- Text Gradient Utilities ---- */
+.text-gradient-luxury {
+  background: linear-gradient(135deg, #fff, #d4d4d4, #a3a3a3);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-primary {
+  background: linear-gradient(135deg, #2a3729, #265143);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---- Card Luxury ---- */
+.card-luxury {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.card-luxury:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(42, 55, 41, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* ---- Link Luxury ---- */
+.link-luxury {
+  position: relative;
+  overflow: hidden;
+}
+
+.link-luxury::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2a3729, #265143);
+  transition: width 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.link-luxury:hover::after {
+  width: 100%;
+}
+
+/* ---- Amble Utility Classes ---- */
+.amble-text {
+  font-family: 'Amble', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.amble-light    { font-weight: 300; }
+.amble-regular  { font-weight: 400; }
+.amble-bold     { font-weight: 700; }
+.amble-condensed { font-stretch: condensed; font-weight: 300; }
+
+/* ---- Other Text Utilities ---- */
+.text-elegant {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.text-balance { text-wrap: balance; }
+.text-pretty  { text-wrap: pretty; }
+
+/* ---- Backdrop Luxury ---- */
+.backdrop-luxury {
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+}
+
+/* ---- Border / Divide Luxury ---- */
+.border-luxury { border: 1px solid rgba(255, 255, 255, 0.1); }
+.divide-luxury > * + * { border-top: 1px solid rgba(255, 255, 255, 0.1); }
+
+/* ---- Animate Fade In Luxury ---- */
+@keyframes fadeInLuxury {
+  0%   { opacity: 0; transform: translateY(40px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-luxury {
+  animation: fadeInLuxury 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* ---- Loading Overlay ---- */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #061717, #0d1518, #272831);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.loading-content {
+  text-align: center;
+  color: #fff;
+}
+
+.loading-logo {
+  width: 120px;
+  height: 150px;
+  margin: 0 auto 2rem;
+  opacity: 0.9;
+}
+
+.loading-logo-img {
+  width: 100%;
+  height: 100%;
+  filter: brightness(0) invert(1);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-brand {
+  display: block;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.5rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(45deg, #fff, #d4d4d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.loading-subtitle {
+  display: block;
+  font-size: 0.875rem;
+  letter-spacing: 0.25rem;
+  opacity: 0.8;
+  color: #a3a3a3;
+}
+
+.loading-progress {
+  width: 200px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 1.5rem auto 0;
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.loading-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #2a3729, #265143);
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+/* ---- Navigation ---- */
+.nav-scrolled {
+  background: rgba(6, 23, 23, 0.95) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.nav-link.active {
+  color: #fff;
+  background: rgba(42, 55, 41, 0.1);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 2px;
+  background: linear-gradient(90deg, #2a3729, #265143);
+  border-radius: 1px;
+}
+
+/* ---- Animations ---- */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes bounceSubtle {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.animate-float          { animation: float 6s ease-in-out infinite; }
+.animate-bounce-subtle  { animation: bounceSubtle 2s ease-in-out infinite; }
+
+/* ---- Custom Cursor ---- */
+.custom-cursor {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(42, 55, 41, 0.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transition: all 0.1s ease;
+  transform: translate(-50%, -50%);
+}
+
+.custom-cursor-dot {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background: #2a3729;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: all 0.15s ease;
+}
+
+.custom-cursor.cursor-hover {
+  width: 60px;
+  height: 60px;
+  border-color: rgba(42, 55, 41, 0.6);
+  background: rgba(42, 55, 41, 0.05);
+}
+
+.custom-cursor-dot.cursor-hover {
+  width: 8px;
+  height: 8px;
+  background: #265143;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .custom-cursor,
+  .custom-cursor-dot {
+    display: none !important;
+  }
+}
+
+/* ---- Reduced Motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-animate],
+  [data-animate-delay] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  html { scroll-behavior: auto; }
+}
+
+/* ---- High Contrast ---- */
+@media (prefers-contrast: high) {
+  body { background: #000 !important; color: #fff !important; }
+  .text-neutral-300, .text-neutral-400, .text-neutral-600 { color: #fff !important; }
+  .border-primary\/10, .border-primary\/20 { border-color: #fff !important; }
+}
+
+/* ---- Focused Form Labels ---- */
+.focused label {
+  color: #2a3729;
+  transform: scale(0.9);
+}
+
+input:focus,
+textarea:focus {
+  box-shadow: 0 0 0 1px rgba(42, 55, 41, 0.3), 0 0 20px rgba(42, 55, 41, 0.1);
+}
+
+/* ---- Tour Section ---- */
+.tour-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  cursor: grab;
+}
+
+.tour-canvas-container:active {
+  cursor: grabbing;
+}

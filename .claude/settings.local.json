@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/CarlosOmarAldabaEstr/Desktop/linzea/vue-linzea/public/**)",
+      "Read(//c/Users/CarlosOmarAldabaEstr/Desktop/linzea/vue-linzea/**)",
+      "Bash(npm install *)",
+      "Bash(mkdir -p \"C:/Users/CarlosOmarAldabaEstr/Downloads/alta-norte/alta-norte-vue/public/svg\")",
+      "Bash(cp \"C:/Users/CarlosOmarAldabaEstr/Desktop/linzea/vue-linzea/public/svg/lotificacionCapaTagged.svg\" \"C:/Users/CarlosOmarAldabaEstr/Downloads/alta-norte/alta-norte-vue/public/svg/\")",
+      "Bash(cp \"C:/Users/CarlosOmarAldabaEstr/Desktop/linzea/vue-linzea/public/svg/lotificacionFondo.webp\" \"C:/Users/CarlosOmarAldabaEstr/Downloads/alta-norte/alta-norte-vue/public/svg/\")",
+      "Bash(cp \"C:/Users/CarlosOmarAldabaEstr/Desktop/linzea/vue-linzea/public/lotes.txt\" \"C:/Users/CarlosOmarAldabaEstr/Downloads/alta-norte/alta-norte-vue/public/\")",
+      "Bash(npm run *)",
+      "WebFetch(domain:www.altanorte.mx)",
+      "Bash(xargs grep *)",
+      "Bash(npm uninstall *)",
+      "Bash(find . -name '*&&*' ! -path './.git/*' -delete)",
+      "Bash(find . -name '*\"*' ! -path './.git/*' -delete)",
+      "Bash(xargs rm *)"
+    ]
+  }
+}
