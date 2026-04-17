@@ -89,7 +89,7 @@
               </div>
               <div>
                 <p class="text-neutral-400 text-sm font-medium">Teléfono</p>
-                <p class="text-white text-sm">+52 (444) 123-4567</p>
+                <p class="text-white text-sm">+52 (618) 109-0020</p>
               </div>
             </div>
             <div class="flex items-start space-x-3">
