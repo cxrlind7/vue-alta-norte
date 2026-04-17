@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useLotes, refreshReservations } from '../composables/useLotes.js'
+import { useLotes, setLoteEstatus, refreshReservations } from '../composables/useLotes.js'
 import CotizacionModal from './CotizacionModal.vue'
 import { useAdminState } from '../composables/useAdminState'
 
@@ -45,7 +45,7 @@ watch(
     if (newIdx !== null && lots.length > 0) {
       const byNum = lots.find(l => l.lote === newIdx)
       const candidate = byNum ?? lots[Math.min(newIdx - 1, lots.length - 1)]
-      if (candidate?.estatus === 'DISPONIBLE') {
+      if (candidate && (isAdmin.value || candidate.estatus === 'DISPONIBLE')) {
         selectedLote.value = candidate
       } else if (manzanaChanged) {
         selectedLote.value = null
@@ -83,13 +83,24 @@ function statusStyle(estatus) {
 }
 
 function selectLote(lote) {
-  if (lote.estatus !== 'DISPONIBLE') return
+  if (!isAdmin.value && lote.estatus !== 'DISPONIBLE') return
   const toggled = selectedLote.value?.lote === lote.lote ? null : lote
   selectedLote.value = toggled
   emit('select-lot', toggled
     ? { manzana: props.manzanaId, loteIndex: toggled.lote }
     : { manzana: props.manzanaId, loteIndex: null }
   )
+}
+
+const updatingEstatus = ref(false)
+async function toggleApartado() {
+  if (!selectedLote.value || updatingEstatus.value) return
+  updatingEstatus.value = true
+  const nuevoEstatus = selectedLote.value.estatus === 'APARTADO' ? 'DISPONIBLE' : 'APARTADO'
+  await setLoteEstatus(manzanaKey.value, selectedLote.value.lote, nuevoEstatus)
+  await refreshReservations()
+  selectedLote.value = null
+  updatingEstatus.value = false
 }
 
 const totalPrice = computed(() => {
@@ -141,13 +152,13 @@ const totalPrice = computed(() => {
         <p v-else-if="manzanaLotes.length === 0" class="text-gray-400 text-sm text-center py-4">Sin lotes registrados para esta sección.</p>
 
         <button v-for="lote in manzanaLotes" :key="lote.lote" @click="selectLote(lote)"
-          :disabled="lote.estatus !== 'DISPONIBLE'" :class="[
+          :disabled="!isAdmin && lote.estatus !== 'DISPONIBLE'" :class="[
             'w-full flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-all',
-            lote.estatus === 'DISPONIBLE'
-              ? selectedLote?.lote === lote.lote
-                ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-                : 'hover:bg-slate-50 cursor-pointer border-slate-200'
-              : 'opacity-50 cursor-not-allowed border-transparent',
+            selectedLote?.lote === lote.lote
+              ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+              : lote.estatus === 'DISPONIBLE' || isAdmin
+                ? 'hover:bg-slate-50 cursor-pointer border-slate-200'
+                : 'opacity-50 cursor-not-allowed border-transparent',
             lote.estatus !== 'DISPONIBLE' && selectedLote?.lote !== lote.lote ? statusStyle(lote.estatus) : ''
           ]">
           <span class="font-semibold">Lote {{ lote.lote }}</span>
@@ -190,16 +201,36 @@ const totalPrice = computed(() => {
             <p class="text-2xl font-black text-white">{{ formatCurrency(totalPrice) }}</p>
           </div>
 
-          <button @click="showCotizacion = true; emit('cotizar')"
+          <!-- Admin: Apartar / Desapartar -->
+          <template v-if="isAdmin">
+            <button
+              v-if="selectedLote.estatus === 'DISPONIBLE' || selectedLote.estatus === 'APARTADO'"
+              @click="toggleApartado"
+              :disabled="updatingEstatus"
+              :class="[
+                'w-full py-3 font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2 disabled:opacity-50',
+                selectedLote.estatus === 'APARTADO'
+                  ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                  : 'bg-amber-500 hover:bg-amber-600 text-white'
+              ]">
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  :d="selectedLote.estatus === 'APARTADO' ? 'M5 13l4 4L19 7' : 'M12 15v2m0 0v2m0-2h2m-2 0H10M12 3v1m0 0V3m0 1a9 9 0 110 18A9 9 0 0112 4z'" />
+              </svg>
+              {{ updatingEstatus ? 'Guardando…' : selectedLote.estatus === 'APARTADO' ? 'Desapartar Lote' : 'Apartar Lote' }}
+            </button>
+            <div v-else class="text-center text-sm text-slate-400 py-1">
+              Estatus <span class="font-bold">{{ selectedLote.estatus }}</span> — sin acción disponible
+            </div>
+          </template>
+          <!-- Usuario: Generar Cotización -->
+          <button v-else @click="showCotizacion = true; emit('cotizar')"
             class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2">
-            <svg v-if="isAdmin" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-            </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
-            {{ isAdmin ? 'Apartar Lote' : 'Generar Cotización' }}
+            Generar Cotización
           </button>
         </template>
       </div>

@@ -47,7 +47,7 @@
                    hover:scale-105 hover:shadow-elegant-lg
                    focus:outline-none focus:ring-4 focus:ring-primary/30
                    overflow-hidden"
-            @click="scrollTo('#contacto')"
+            @click="scrollTo('#planos')"
           >
             <div class="absolute inset-0 bg-gradient-elegant from-secondary to-primary scale-x-0 group-hover:scale-x-100 origin-center transition-transform duration-500 ease-elegant"></div>
             <span class="relative z-10">COTIZA Y APARTA TU LOTE</span>
