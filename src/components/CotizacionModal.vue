@@ -115,8 +115,6 @@ function imprimirCotizacion() {
     setTimeout(() => { w.print(); w.close() }, 500)
 }
 
-const enviandoCorreo = ref(false)
-
 function buildPdfBlob() {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const W   = doc.internal.pageSize.getWidth()
@@ -191,33 +189,13 @@ function buildPdfBlob() {
     return doc.output('blob')
 }
 
-async function enviarPorCorreo() {
+function enviarPorCorreo() {
     if (!props.lote) return
-    enviandoCorreo.value = true
+    const to      = import.meta.env.VITE_CONTACT_EMAIL || ''
+    const subject = `Solicitud – Sección ${props.manzana} Lote ${props.lote.lote}`
+    const body    = `Hola Alta Norte,\n\nMe interesa el Lote ${props.lote.lote}, Sección ${props.manzana} (${fmtArea(props.lote.superficie)} m²).\nPrecio estimado: ${fmt(precioTotal.value)}.\n\nSaludos,\n${clienteNombre.value}`
 
-    try {
-        const blob     = buildPdfBlob()
-        const filename = `cotizacion-alta-norte-${props.manzana}-lote${props.lote.lote}.pdf`
-        const file     = new File([blob], filename, { type: 'application/pdf' })
-        const subject  = `Solicitud de información – Sección ${props.manzana} Lote ${props.lote.lote}`
-        const body     = `Hola, equipo de Alta Norte.\n\nMe interesa obtener más información sobre el siguiente lote:\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total estimado: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual estimado: ${fmt(montoPago.value)}\n\nQuedo en espera de su contacto.\n\nSaludos,\n${clienteNombre.value}`
-
-        const to = import.meta.env.VITE_CONTACT_EMAIL || ''
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({ files: [file], title: subject, text: body })
-        } else {
-            const url = URL.createObjectURL(blob)
-            const a   = document.createElement('a')
-            a.href = url; a.download = filename; a.click()
-            URL.revokeObjectURL(url)
-            setTimeout(() => {
-                window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-            }, 600)
-        }
-    } finally {
-        enviandoCorreo.value = false
-    }
+    window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 }
 
 watch(() => props.lote, () => {
@@ -383,17 +361,13 @@ watch(() => props.lote, () => {
                         </div>
 
                         <div class="space-y-2 mt-auto">
-                            <button @click="enviarPorCorreo" :disabled="enviandoCorreo"
-                                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow">
-                                <svg v-if="!enviandoCorreo" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button @click="enviarPorCorreo"
+                                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                                </svg>
-                                {{ enviandoCorreo ? 'Generando PDF…' : 'Enviar por Correo' }}
+                                Enviar Correo
                             </button>
                             <button @click="imprimirCotizacion"
                                 class="w-full py-2.5 border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
