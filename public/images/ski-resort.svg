@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 533" preserveAspectRatio="xMidYMid slice">
+  <!-- Background -->
+  <rect width="400" height="533" fill="#0d3028"/>
+
+  <!-- Stars -->
+  <circle cx="45" cy="30" r="1" fill="white" opacity="0.6"/>
+  <circle cx="120" cy="18" r="1.2" fill="white" opacity="0.5"/>
+  <circle cx="200" cy="12" r="0.9" fill="white" opacity="0.7"/>
+  <circle cx="300" cy="25" r="1.1" fill="white" opacity="0.5"/>
+  <circle cx="360" cy="10" r="0.8" fill="white" opacity="0.6"/>
+  <circle cx="75" cy="55" r="0.8" fill="white" opacity="0.4"/>
+  <circle cx="160" cy="40" r="1" fill="white" opacity="0.5"/>
+  <circle cx="240" cy="35" r="0.8" fill="white" opacity="0.6"/>
+  <circle cx="320" cy="48" r="1.2" fill="white" opacity="0.4"/>
+  <circle cx="385" cy="32" r="0.9" fill="white" opacity="0.5"/>
+  <circle cx="30" cy="80" r="1" fill="white" opacity="0.35"/>
+  <circle cx="90" cy="95" r="0.7" fill="white" opacity="0.4"/>
+  <circle cx="350" cy="70" r="1" fill="white" opacity="0.35"/>
+
+  <!-- Far mountain range (dark) -->
+  <path d="M-10,280 L60,180 L120,230 L180,140 L240,200 L300,160 L360,190 L410,150 L410,340 L-10,340Z" fill="#0a2520"/>
+
+  <!-- Near mountains -->
+  <path d="M-10,340 L40,260 L80,290 L140,200 L200,260 L260,210 L320,250 L380,220 L410,240 L410,400 L-10,400Z" fill="#0f2e26"/>
+
+  <!-- Main mountain with snow cap -->
+  <path d="M140,200 L200,260 L260,210 L240,210 L200,155 L160,210Z" fill="#153f35"/>
+  <!-- Snow cap peak -->
+  <path d="M200,155 L186,200 L200,195 L214,200Z" fill="rgba(255,255,255,0.55)"/>
+  <path d="M200,155 L190,185 L200,180 L210,185Z" fill="rgba(255,255,255,0.75)"/>
+
+  <!-- Ski run - winding path down the mountain -->
+  <path d="M200,160 C205,175 220,185 215,200 C210,215 195,220 200,240 C205,255 225,260 220,280 C215,295 200,300 205,320 C208,335 220,340 215,355 C212,365 205,368 205,380"
+        fill="none"
+        stroke="rgba(255,255,255,0.85)"
+        stroke-width="3"
+        stroke-linecap="round"/>
+
+  <!-- Ski lift poles -->
+  <line x1="130" y1="280" x2="125" y2="360" stroke="#1a4a3e" stroke-width="2.5"/>
+  <line x1="155" y1="265" x2="150" y2="345" stroke="#1a4a3e" stroke-width="2.5"/>
+  <line x1="180" y1="255" x2="175" y2="335" stroke="#1a4a3e" stroke-width="2.5"/>
+  <line x1="205" y1="248" x2="200" y2="328" stroke="#1a4a3e" stroke-width="2.5"/>
+  <line x1="230" y1="250" x2="225" y2="330" stroke="#1a4a3e" stroke-width="2.5"/>
+
+  <!-- Lift cable -->
+  <path d="M125,320 L150,305 L175,295 L200,288 L225,290" fill="none" stroke="#1d5445" stroke-width="1.5"/>
+
+  <!-- Lift gondola -->
+  <rect x="191" y="280" width="12" height="10" rx="2" fill="#aebc82" opacity="0.85"/>
+  <rect x="155" y="298" width="11" height="9" rx="2" fill="#aebc82" opacity="0.65"/>
+
+  <!-- Pine trees at base (left) -->
+  <g opacity="0.75">
+    <polygon points="60,400 75,350 90,400" fill="#0d3028"/>
+    <polygon points="58,395 75,340 92,395" fill="#112e26"/>
+    <polygon points="55,392 75,330 95,392" fill="#0d3028"/>
+    <polygon points="80,400 95,355 110,400" fill="#112e26"/>
+    <polygon points="78,396 95,345 112,396" fill="#0d3028"/>
+  </g>
+  <!-- Pine trees at base (right) -->
+  <g opacity="0.75">
+    <polygon points="290,400 305,350 320,400" fill="#0d3028"/>
+    <polygon points="288,395 305,340 322,395" fill="#112e26"/>
+    <polygon points="285,392 305,330 325,392" fill="#0d3028"/>
+    <polygon points="310,400 325,355 340,400" fill="#112e26"/>
+    <polygon points="308,396 325,345 342,396" fill="#0d3028"/>
+  </g>
+
+  <!-- Foreground slope -->
+  <path d="M-10,430 Q100,390 200,420 Q300,445 410,410 L410,533 L-10,533Z" fill="#0a1f1a"/>
+
+  <!-- Subtle snow texture at top -->
+  <rect width="400" height="533" fill="url(#snowOverlay)" opacity="0.03"/>
+  <defs>
+    <radialGradient id="snowOverlay" cx="50%" cy="0%" r="80%">
+      <stop offset="0%" stop-color="white"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Vignette -->
+  <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
+    <stop offset="0%" stop-color="transparent"/>
+    <stop offset="100%" stop-color="rgba(0,0,0,0.45)"/>
+  </radialGradient>
+  <rect width="400" height="533" fill="url(#vignette)"/>
+</svg>

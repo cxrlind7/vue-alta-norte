@@ -1,19 +1,5 @@
 <template>
-  <!-- Loading Overlay -->
-  <div class="loading-overlay" v-if="loading" :style="{ opacity: loadingFadeOut ? 0 : 1, pointerEvents: loadingFadeOut ? 'none' : 'auto' }">
-    <div class="loading-content">
-      <div class="loading-logo">
-        <img src="/isologo.svg" class="loading-logo-img" alt="Alta Norte" />
-      </div>
-      <div class="loading-text">
-        <span class="loading-brand">ALTA NORTE</span>
-        <span class="loading-subtitle">Desarrollo Campestre</span>
-      </div>
-      <div class="loading-progress">
-        <div class="loading-progress-bar" :style="{ width: loadingProgress + '%' }"></div>
-      </div>
-    </div>
-  </div>
+
 
   <!-- Custom Cursor (desktop only) -->
   <div class="custom-cursor" ref="cursor" style="display:none" :style="tourOpen ? { opacity: 0, pointerEvents: 'none' } : {}"></div>
@@ -42,11 +28,12 @@
   </div>
 
   <!-- Main App -->
-  <div v-else :class="{ 'opacity-0': loading && !loadingFadeOut }">
+  <div v-else>
     <NavBar />
     <main class="relative bg-surface">
       <HeroSection />
       <AboutSection />
+      <AmenitiesSection />
       <LifestyleSection />
       <PlansSection />
       <TourSection />
@@ -58,7 +45,7 @@
     <a
       id="whatsapp-float"
       class="whatsapp-float"
-      href="https://wa.me/526181090020?text=Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Alta%20Norte"
+      :href="floatingWhatsapp"
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Contactar por WhatsApp"
@@ -88,10 +75,12 @@
 import { ref, onMounted, computed } from 'vue'
 import { useTourState } from './composables/useTourState'
 import { useAdminState } from './composables/useAdminState'
+import { useI18n } from './composables/useI18n.js'
 import AdminLogin from './components/AdminLogin.vue'
 import NavBar from './components/NavBar.vue'
 import HeroSection from './components/HeroSection.vue'
 import AboutSection from './components/AboutSection.vue'
+import AmenitiesSection from './components/AmenitiesSection.vue'
 import LifestyleSection from './components/LifestyleSection.vue'
 import PlansSection from './components/PlansSection.vue'
 import TourSection from './components/TourSection.vue'
@@ -100,6 +89,14 @@ import AppFooter from './components/AppFooter.vue'
 
 const { tourOpen } = useTourState()
 const { isAdmin, logout } = useAdminState()
+const { lang } = useI18n()
+
+const floatingWhatsapp = computed(() => {
+  const msg = lang.value === 'en'
+    ? "Hello%2C%20I%27m%20interested%20in%20learning%20more%20about%20Alta%20Norte"
+    : 'Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Alta%20Norte'
+  return `https://wa.me/526181090020?text=${msg}`
+})
 
 function handleLogout() {
   logout()
@@ -109,9 +106,6 @@ function handleLogout() {
 const isAdminRoute   = window.location.pathname === '/admin'
 const showAdminLogin = ref(isAdminRoute && !isAdmin.value)
 
-const loading = ref(true)
-const loadingFadeOut = ref(false)
-const loadingProgress = ref(0)
 const whatsappVisible = ref(false)
 const cursor = ref(null)
 const cursorDot = ref(null)
@@ -132,26 +126,12 @@ const whatsappStyle = computed(() => ({
 }))
 
 onMounted(() => {
-  // Loading progress animation
-  const interval = setInterval(() => {
-    loadingProgress.value += Math.random() * 20
-    if (loadingProgress.value >= 100) {
-      loadingProgress.value = 100
-      clearInterval(interval)
-      setTimeout(() => {
-        loadingFadeOut.value = true
-        setTimeout(() => {
-          loading.value = false
-          // Show WhatsApp
-          setTimeout(() => { whatsappVisible.value = true }, 1000)
-          // Initialize scroll animations
-          initScrollAnimations()
-          // Initialize custom cursor
-          initCursor()
-        }, 800)
-      }, 300)
-    }
-  }, 150)
+  // Show WhatsApp after a short delay
+  setTimeout(() => { whatsappVisible.value = true }, 1000)
+  // Initialize scroll animations
+  initScrollAnimations()
+  // Initialize custom cursor
+  initCursor()
 })
 
 function initScrollAnimations() {
@@ -213,10 +193,10 @@ function initCursor() {
   display: inline-flex;
   padding: 1.5px;
   border-radius: 50px;
-  background: linear-gradient(135deg, #25D366 0%, #265143 50%, #2a3729 100%);
+  background: linear-gradient(135deg, #25D366 0%, #aebc82 50%, #153f35 100%);
   box-shadow:
-    0 4px 24px rgba(37, 211, 102, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.35);
+    0 4px 24px rgba(174, 188, 130, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.30);
   transition: box-shadow 0.35s ease, transform 0.35s ease;
 }
 
@@ -232,7 +212,7 @@ function initCursor() {
   display: flex;
   align-items: center;
   gap: 0;
-  background: rgba(6, 23, 23, 0.92);
+  background: rgba(21, 63, 53, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 50px;

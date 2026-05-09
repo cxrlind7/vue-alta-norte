@@ -72,10 +72,10 @@ function formatArea(value) {
 }
 
 const STATUS_STYLE = {
-  DISPONIBLE: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  APARTADO: 'bg-amber-100  text-amber-700  border-amber-200',
-  RESERVADO: 'bg-slate-100  text-slate-500  border-slate-200',
-  VENDIDO: 'bg-red-100    text-red-600    border-red-200',
+  DISPONIBLE: 'bg-secondary/20 text-primary border-secondary/40',
+  APARTADO:   'bg-amber-100  text-amber-700  border-amber-200',
+  RESERVADO:  'bg-slate-100  text-slate-500  border-slate-200',
+  VENDIDO:    'bg-red-100    text-red-600    border-red-200',
 }
 
 function statusStyle(estatus) {
@@ -114,14 +114,14 @@ const totalPrice = computed(() => {
 
     <!-- Empty state -->
     <div v-if="!manzanaId" class="flex flex-col items-center justify-center h-full text-center p-8 space-y-4">
-      <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center text-blue-400">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center text-primary" style="background-color:rgba(174,188,130,0.2);">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
       </div>
-      <h2 class="text-xl font-bold text-gray-900">Selecciona una Sección</h2>
-      <p class="text-gray-500 text-sm max-w-[200px]">Da clic sobre el plano interactivo para ver los lotes disponibles.</p>
+      <h2 class="text-xl font-bold text-primary">Selecciona una Sección</h2>
+      <p class="text-neutral-500 text-sm max-w-[200px]">Da clic sobre el plano interactivo para ver los lotes disponibles.</p>
     </div>
 
     <!-- Section selected -->
@@ -130,10 +130,10 @@ const totalPrice = computed(() => {
       <!-- Header -->
       <div class="px-5 pt-5 pb-4 border-b border-slate-100 flex items-start justify-between">
         <div>
-          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Sección</p>
-          <h2 class="text-3xl font-extrabold text-blue-950">{{ manzanaKey }}</h2>
+          <p class="text-xs font-bold uppercase tracking-widest mb-1" style="color:#aebc82;">Sección</p>
+          <h2 class="text-3xl font-extrabold text-primary">{{ manzanaKey }}</h2>
           <p class="text-sm text-gray-500 mt-1">
-            <span class="font-semibold text-emerald-600">{{ disponibles }}</span>
+            <span class="font-semibold text-primary">{{ disponibles }}</span>
             lote{{ disponibles !== 1 ? 's' : '' }} disponible{{ disponibles !== 1 ? 's' : '' }}
             de {{ manzanaLotes.length }} en total
           </p>
@@ -155,7 +155,7 @@ const totalPrice = computed(() => {
           :disabled="!isAdmin && lote.estatus !== 'DISPONIBLE'" :class="[
             'w-full flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm transition-all',
             selectedLote?.lote === lote.lote
-              ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+              ? 'border-primary text-white shadow-md bg-primary'
               : lote.estatus === 'DISPONIBLE' || isAdmin
                 ? 'hover:bg-slate-50 cursor-pointer border-slate-200'
                 : 'opacity-50 cursor-not-allowed border-transparent',
@@ -196,8 +196,8 @@ const totalPrice = computed(() => {
             <span class="font-semibold">{{ selectedLote.categoria }}</span>
           </div>
 
-          <div class="bg-gradient-to-r from-blue-900 to-slate-900 p-4 rounded-xl shadow-md">
-            <p class="text-blue-200 text-xs font-medium mb-1">Precio Total Estimado</p>
+          <div class="p-4 rounded-xl shadow-md" style="background-color:#153f35;">
+            <p class="text-xs font-bold mb-1 tracking-widest uppercase" style="color:#aebc82;">Precio Total Estimado</p>
             <p class="text-2xl font-black text-white">{{ formatCurrency(totalPrice) }}</p>
           </div>
 
@@ -225,7 +225,8 @@ const totalPrice = computed(() => {
           </template>
           <!-- Usuario: Generar Cotización -->
           <button v-else @click="showCotizacion = true; emit('cotizar')"
-            class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2">
+            class="w-full py-3 font-bold rounded-xl shadow transition-all flex items-center justify-center gap-2 hover:opacity-90 active:scale-98 tracking-wide"
+            style="background-color:#aebc82; color:#153f35;">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z" />

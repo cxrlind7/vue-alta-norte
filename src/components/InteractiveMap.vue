@@ -106,7 +106,7 @@ function onShapeLeave() { _setCursorType('pan') }
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STATUS_COLOR = {
-  DISPONIBLE: { fill: '#22c55e', stroke: '#16a34a', opacity: '1', text: '#14532d' },
+  DISPONIBLE: { fill: '#aebc82', stroke: '#74804f', opacity: '1', text: '#153f35' },
   APARTADO:   { fill: '#f59e0b', stroke: '#d97706', opacity: '1', text: '#78350f' },
   RESERVADO:  { fill: '#94a3b8', stroke: '#64748b', opacity: '1', text: '#1e293b' },
   VENDIDO:    { fill: '#ef4444', stroke: '#dc2626', opacity: '1', text: '#7f1d1d' },

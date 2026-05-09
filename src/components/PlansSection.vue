@@ -1,11 +1,13 @@
 <template>
-  <section id="planos" class="py-16 bg-gray-50" data-animate>
+  <section id="planos" class="py-16 bg-white" data-animate>
     <div class="max-w-7xl mx-auto px-6 lg:px-8">
 
       <!-- Header -->
-      <div class="mb-8 space-y-3" data-animate-delay="100">
+      <div class="mb-8 space-y-4" data-animate-delay="100">
+        <p class="text-xs font-bold tracking-[0.4em] uppercase" style="color:#aebc82;">Mapa de Lotes</p>
         <h2 class="text-4xl lg:text-5xl font-bold text-primary leading-tight">PLANO INTERACTIVO</h2>
-        <p class="text-lg text-gray-700 max-w-2xl">
+        <div class="w-14 h-0.5" style="background-color:#aebc82;"></div>
+        <p class="text-lg text-neutral-600 max-w-2xl font-light">
           Explora los lotes disponibles. Da clic sobre cualquier lote para ver su información y generar una cotización.
         </p>
       </div>
@@ -14,18 +16,19 @@
       <div class="flex gap-4" style="height: 680px;" data-animate-delay="200">
 
         <!-- Map column -->
-        <div class="flex-1 flex flex-col rounded-2xl overflow-hidden shadow-2xl min-w-0">
+        <div class="flex-1 flex flex-col rounded-2xl overflow-hidden shadow-2xl min-w-0 border border-primary/10">
 
           <!-- Toggle bar -->
-          <div class="flex items-center gap-2 px-4 py-3 bg-slate-900 shrink-0">
+          <div class="flex items-center gap-2 px-4 py-3 shrink-0" style="background-color:#153f35;">
             <button
               @click="view = 'plano'"
               :class="[
-                'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all',
+                'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold transition-all tracking-wide',
                 view === 'plano'
-                  ? 'bg-white text-slate-900 shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-primary shadow'
+                  : 'text-white/50 hover:text-white'
               ]"
+              :style="view === 'plano' ? { backgroundColor: '#aebc82' } : {}"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -36,11 +39,12 @@
             <button
               @click="view = 'lotes'"
               :class="[
-                'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all',
+                'flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-bold transition-all tracking-wide',
                 view === 'lotes'
-                  ? 'bg-white text-slate-900 shadow'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-primary shadow'
+                  : 'text-white/50 hover:text-white'
               ]"
+              :style="view === 'lotes' ? { backgroundColor: '#aebc82' } : {}"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -69,7 +73,7 @@
         </div>
 
         <!-- Right sidebar -->
-        <div class="w-80 shrink-0 rounded-2xl overflow-hidden shadow-xl border border-slate-100">
+        <div class="w-80 shrink-0 rounded-2xl overflow-hidden shadow-xl border border-primary/10">
           <QuotationPanel
             :manzana-id="selectedManzana"
             :lote-index="selectedLoteIndex"
