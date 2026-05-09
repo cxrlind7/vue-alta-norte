@@ -14,7 +14,13 @@
       "Bash(npm uninstall *)",
       "Bash(find . -name '*&&*' ! -path './.git/*' -delete)",
       "Bash(find . -name '*\"*' ! -path './.git/*' -delete)",
-      "Bash(xargs rm *)"
+      "Bash(xargs rm *)",
+      "Bash(python3 -c ' *)",
+      "Bash(npx vite *)",
+      "Bash(git checkout *)",
+      "Bash(git tag *)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(grep -o \"font-family:[^;]*\\\\|color:#[a-fA-F0-9]\\\\{3,6\\\\}\\\\|background:[^;]*\\\\|font-size:[^;]*\" \"C:/Users/CarlosOmarAldabaEstr/Downloads/Reserva Alta Norte.html\")"
     ]
   }
 }

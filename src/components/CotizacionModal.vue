@@ -3,49 +3,38 @@ import { ref, computed, watch } from 'vue'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAdminState } from '../composables/useAdminState'
-import { setLoteEstatus, refreshReservations } from '../composables/useLotes'
+import { setLoteEstatus } from '../composables/useLotes'
 
 const { isAdmin } = useAdminState()
 
 const props = defineProps({
-    lote: { type: Object, default: null },
+    lote:    { type: Object, default: null },
     manzana: { type: String, default: '' }
 })
-
 const emit = defineEmits(['close', 'confirm'])
 
-const clienteNombre = ref('')
-const clienteTelefono = ref('')
-const enganchePct = ref(20)
-const plazoMeses = ref(24)
+const clienteNombre    = ref('')
+const clienteTelefono  = ref('')
+const enganchePct      = ref(20)
+const plazoMeses       = ref(24)
 
-const PLAZO_OPCIONES = [6, 12, 18, 24, 36, 48, 60]
+// Financiamiento hasta 48 meses, enganche desde 20 %
+const PLAZO_OPCIONES    = [6, 12, 18, 24, 36, 48]
+const ENGANCHE_OPCIONES = [20, 25, 30, 40, 50]
 
 const formularioInvalido = computed(() =>
     !clienteNombre.value.trim() || clienteTelefono.value.length !== 10
 )
 
-const precioTotal = computed(() =>
-    props.lote ? props.lote.superficie * props.lote.precio : 0
-)
-
-const engancheAmt = computed(() =>
-    precioTotal.value * (enganchePct.value / 100)
-)
-
-const saldo = computed(() =>
-    precioTotal.value - engancheAmt.value
-)
-
-const montoPago = computed(() =>
-    plazoMeses.value > 0 ? saldo.value / plazoMeses.value : 0
-)
+const precioTotal = computed(() => props.lote ? props.lote.superficie * props.lote.precio : 0)
+const engancheAmt = computed(() => precioTotal.value * (enganchePct.value / 100))
+const saldo       = computed(() => precioTotal.value - engancheAmt.value)
+const montoPago   = computed(() => plazoMeses.value > 0 ? saldo.value / plazoMeses.value : 0)
 
 const tablaDePageos = computed(() => {
     const rows = []
     let saldoActual = saldo.value
     const now = new Date()
-
     for (let i = 1; i <= plazoMeses.value; i++) {
         const fecha = new Date(now.getFullYear(), now.getMonth() + i, now.getDate())
         const monto = montoPago.value
@@ -65,7 +54,6 @@ const tablaDePageos = computed(() => {
 function fmt(v) {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(v)
 }
-
 function fmtArea(v) {
     return new Intl.NumberFormat('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v)
 }
@@ -74,135 +62,139 @@ async function reservarLote() {
     if (!props.lote || !props.manzana) return
     await setLoteEstatus(props.manzana, props.lote.lote, 'APARTADO')
     emit('confirm', {
-        manzana: props.manzana,
-        lote: props.lote,
-        cliente: clienteNombre.value,
-        plazo: plazoMeses.value,
-        enganchePct: enganchePct.value,
-        precioTotal: precioTotal.value,
-        engancheAmt: engancheAmt.value,
-        saldo: saldo.value,
-        montoPago: montoPago.value
+        manzana: props.manzana, lote: props.lote,
+        cliente: clienteNombre.value, plazo: plazoMeses.value,
+        enganchePct: enganchePct.value, precioTotal: precioTotal.value,
+        engancheAmt: engancheAmt.value, saldo: saldo.value, montoPago: montoPago.value
     })
 }
 
-function imprimirCotizacion() {
-    const printContent = document.getElementById('cotizacion-print-area')
-    if (!printContent) return
-    const w = window.open('', '_blank', 'width=900,height=1200')
-    w.document.write(`
-    <html><head><title>Cotización Alta Norte</title>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-      * { box-sizing: border-box; margin: 0; padding: 0; font-family: Inter, sans-serif; }
-      body { background: white; color: #1a1a2e; padding: 40px; }
-      .header { text-align: center; margin-bottom: 32px; }
-      .brand { font-size: 28px; font-weight: 900; color: #1a1a2e; letter-spacing: -1px; }
-      .sub { font-size: 12px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
-      table.info { border-collapse: collapse; width: 60%; margin: 0 auto 24px; }
-      table.info td { border: 1px solid #ccc; padding: 6px 12px; font-size: 13px; }
-      table.info td:first-child { background: #4a7c59; color: white; font-weight: 700; width: 40%; }
-      table.payments { border-collapse: collapse; width: 100%; margin-top: 24px; font-size: 12px; }
-      table.payments th { background: #1a1a2e; color: white; padding: 8px 4px; text-align: right; }
-      table.payments th:first-child { text-align: center; }
-      table.payments td { padding: 6px 4px; text-align: right; border-bottom: 1px solid #eee; }
-      table.payments td:first-child { text-align: center; }
-      table.payments tr:nth-child(even) { background: #f8f8f8; }
-      .note { margin-top: 32px; font-size: 11px; font-weight: 700; text-align: center; color: #333; }
-      .footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 10px; color: #999; }
-      .footer-center { text-align: center; color: #4a7c59; font-weight: 700; }
-    </style></head><body>
-    ${printContent.innerHTML}
-    </body></html>
-  `)
-    w.document.close()
-    w.focus()
-    setTimeout(() => { w.print(); w.close() }, 500)
-}
-
-const enviandoCorreo = ref(false)
+// ── PDF ──────────────────────────────────────────────────────────────────────
+// Brand colours as RGB arrays for jsPDF
+const C_GREEN = [21, 63, 53]   // #153f35
+const C_SAGE  = [174, 188, 130] // #aebc82
+const C_WHITE = [255, 255, 255]
+const C_TEXT  = [26, 26, 24]
+const C_MUTED = [107, 107, 96]
 
 function buildPdfBlob() {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' })
     const W   = doc.internal.pageSize.getWidth()
 
-    // Header
-    doc.setFillColor(26, 26, 46)
-    doc.rect(0, 0, W, 28, 'F')
-    doc.setTextColor(255, 255, 255)
-    doc.setFontSize(18)
-    doc.setFont('helvetica', 'bold')
-    doc.text('RESERVA ALTA NORTE', W / 2, 13, { align: 'center' })
-    doc.setFontSize(8)
-    doc.setFont('helvetica', 'normal')
-    doc.text('Ski, Camping & Resort', W / 2, 20, { align: 'center' })
+    // ── Header band ──────────────────────────────────────────────────────────
+    doc.setFillColor(...C_GREEN)
+    doc.rect(0, 0, W, 30, 'F')
 
-    // Info table
+    // Sage accent line at bottom of header
+    doc.setFillColor(...C_SAGE)
+    doc.rect(0, 30, W, 1.2, 'F')
+
+    doc.setTextColor(...C_WHITE)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(16)
+    doc.text('RESERVA ALTA NORTE', W / 2, 12, { align: 'center' })
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(174, 188, 130)
+    doc.text('Ski, Camping & Resort · Sierra Madre', W / 2, 19, { align: 'center' })
+
+    doc.setTextColor(...C_WHITE)
+    doc.setFontSize(7)
+    const today = new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'long', year: 'numeric' })
+    doc.text(`Cotización — ${today}`, W / 2, 25, { align: 'center' })
+
+    // ── Info table ───────────────────────────────────────────────────────────
     autoTable(doc, {
-        startY: 34,
-        margin: { left: 30, right: 30 },
+        startY: 37,
+        margin: { left: 25, right: 25 },
         head: [],
         body: [
-            ['CLIENTE',       clienteNombre.value],
-            ['SECCIÓN',       `SECCIÓN ${props.manzana}`],
-            ['LOTE',          `LOTE ${props.lote.lote}`],
-            ['SUPERFICIE',    `${fmtArea(props.lote.superficie)} m²`],
-            ['PRECIO M²',     fmt(props.lote.precio)],
-            ['PRECIO TOTAL',  fmt(precioTotal.value)],
-            ['ENGANCHE',      fmt(engancheAmt.value)],
-            ['SALDO',         fmt(saldo.value)],
-            ['PLAZOS',        `${plazoMeses.value} meses`],
+            ['CLIENTE',      clienteNombre.value],
+            ['TELÉFONO',     clienteTelefono.value],
+            ['SECCIÓN',      `SECCIÓN ${props.manzana}`],
+            ['LOTE',         `LOTE ${props.lote.lote}`],
+            ['SUPERFICIE',   `${fmtArea(props.lote.superficie)} m²`],
+            ['PRECIO / m²',  fmt(props.lote.precio)],
+            ['PRECIO TOTAL', fmt(precioTotal.value)],
+            ['ENGANCHE ' + enganchePct.value + '%', fmt(engancheAmt.value)],
+            ['SALDO',        fmt(saldo.value)],
+            ['PLAZO',        `${plazoMeses.value} meses`],
+            ['PAGO MENSUAL', fmt(montoPago.value)],
         ],
         columnStyles: {
-            0: { fillColor: [74, 124, 89], textColor: 255, fontStyle: 'bold', cellWidth: 50 },
-            1: { textColor: [26, 26, 46] },
+            0: { fillColor: C_GREEN, textColor: C_SAGE, fontStyle: 'bold', cellWidth: 48 },
+            1: { textColor: C_TEXT, fontStyle: 'bold' },
         },
-        styles: { fontSize: 10, cellPadding: 3 },
+        styles: { fontSize: 10, cellPadding: 3.5 },
         theme: 'grid',
     })
 
-    // Payment schedule
+    // ── Payment schedule ─────────────────────────────────────────────────────
     autoTable(doc, {
-        startY: doc.lastAutoTable.finalY + 8,
+        startY: doc.lastAutoTable.finalY + 10,
         margin: { left: 10, right: 10 },
-        head: [['No.', 'Fecha', 'Saldo Inicial', 'Monto Pago', 'Saldo Final']],
+        head: [['No.', 'Fecha de Pago', 'Saldo Inicial', 'Monto Pago', 'Saldo Final']],
         body: tablaDePageos.value.map(r => [
             r.no, r.fecha, fmt(r.saldoInicial), fmt(r.monto), fmt(r.saldoFinal)
         ]),
-        headStyles: { fillColor: [26, 26, 46], textColor: 255, fontStyle: 'bold', fontSize: 9 },
+        headStyles: {
+            fillColor: C_GREEN, textColor: C_WHITE, fontStyle: 'bold', fontSize: 9,
+            halign: 'center',
+        },
         styles: { fontSize: 8, halign: 'right' },
-        columnStyles: { 0: { halign: 'center' }, 1: { halign: 'center' } },
-        alternateRowStyles: { fillColor: [248, 248, 248] },
+        columnStyles: {
+            0: { halign: 'center' },
+            1: { halign: 'center' },
+            3: { textColor: C_GREEN, fontStyle: 'bold' },
+        },
+        alternateRowStyles: { fillColor: [246, 246, 244] },
         theme: 'grid',
     })
 
-    // Note + footer
+    // ── Footer ───────────────────────────────────────────────────────────────
     const footerY = doc.lastAutoTable.finalY + 10
-    doc.setFontSize(8)
-    doc.setTextColor(100)
+    doc.setFontSize(7.5)
     doc.setFont('helvetica', 'bold')
+    doc.setTextColor(...C_MUTED)
     doc.text('NOTA: LOS PRECIOS PUEDEN CAMBIAR EN CUALQUIER MOMENTO SIN PREVIO AVISO.', W / 2, footerY, { align: 'center' })
+
+    doc.setFillColor(...C_SAGE)
+    doc.rect(10, footerY + 5, W - 20, 0.6, 'F')
+
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(7)
-    doc.setTextColor(150)
-    doc.text('© 2026 – Alta Norte', 10, footerY + 8)
-    doc.setTextColor(74, 124, 89)
+    doc.setTextColor(...C_MUTED)
+    doc.text('© 2026 – Reserva Alta Norte', 10, footerY + 12)
+
+    doc.setTextColor(...C_GREEN)
     doc.setFont('helvetica', 'bold')
-    doc.text('RESERVA ALTA NORTE', W / 2, footerY + 8, { align: 'center' })
+    doc.text('altanorte.mx', W / 2, footerY + 12, { align: 'center' })
+
     doc.setFont('helvetica', 'normal')
-    doc.setTextColor(150)
-    doc.text('Página 1 de 1', W - 10, footerY + 8, { align: 'right' })
+    doc.setTextColor(...C_MUTED)
+    doc.text(`Página 1 de 1`, W - 10, footerY + 12, { align: 'right' })
 
     return doc.output('blob')
 }
 
+function descargarPDF() {
+    const blob = buildPdfBlob()
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `Cotizacion-AltaNorte-Sec${props.manzana}-Lote${props.lote?.lote}.pdf`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+}
+
 function enviarPorCorreo() {
     if (!props.lote || formularioInvalido.value) return
-
     const to      = import.meta.env.VITE_CONTACT_EMAIL || ''
     const subject = `Interés de compra – Sección ${props.manzana} Lote ${props.lote.lote} – ${clienteNombre.value}`
-    const body    = `Hola equipo de Alta Norte,\n\nMi nombre es ${clienteNombre.value} y estoy interesado/a en adquirir el siguiente lote. Por favor contáctenme para continuar con el proceso.\n\nTELÉFONO: ${clienteTelefono.value}\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual: ${fmt(montoPago.value)}\n\nQuedo en espera de su contacto.\n\n${clienteNombre.value}`
-
+    const body    = `Hola equipo de Alta Norte,\n\nMi nombre es ${clienteNombre.value} y estoy interesado/a en adquirir el siguiente lote.\n\nTELÉFONO: ${clienteTelefono.value}\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual: ${fmt(montoPago.value)}\n\nQuedo en espera de su contacto.\n\n${clienteNombre.value}`
     const link = document.createElement('a')
     link.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     link.target = '_blank'
@@ -212,127 +204,154 @@ function enviarPorCorreo() {
 }
 
 watch(() => props.lote, () => {
-    enganchePct.value = 20
-    plazoMeses.value = 24
-    clienteNombre.value = ''
+    enganchePct.value    = 20
+    plazoMeses.value     = 24
+    clienteNombre.value  = ''
     clienteTelefono.value = ''
 })
 </script>
 
 <template>
-    <div class="fixed inset-0 z-50 overflow-y-auto">
-        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')" />
+    <div class="fixed inset-0 z-50 overflow-y-auto" style="font-family:'Amble',sans-serif;">
+        <div class="fixed inset-0 bg-black/65 backdrop-blur-sm" @click="$emit('close')" />
 
         <div class="relative min-h-screen flex items-start justify-center py-6 px-4">
             <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col">
 
-                <div class="bg-gradient-to-r from-slate-900 to-blue-950 px-8 py-5 flex justify-between items-center">
+                <!-- Header -->
+                <div class="px-8 py-5 flex justify-between items-center"
+                     style="background:#153f35;">
+                    <!-- Sage accent line at bottom -->
+                    <div class="absolute bottom-0 left-0 right-0 h-0.5" style="background:#aebc82;"></div>
                     <div>
-                        <p class="text-blue-300 text-xs font-bold uppercase tracking-widest">Cotización</p>
-                        <h2 class="text-white text-2xl font-extrabold mt-0.5">Reserva Alta Norte</h2>
+                        <p class="text-xs font-bold uppercase tracking-[.35em]" style="color:#aebc82;">
+                            Cotización
+                        </p>
+                        <h2 class="text-white text-2xl font-bold mt-0.5 tracking-wide">Reserva Alta Norte</h2>
                     </div>
-                    <button @click="$emit('close')" class="text-white/50 hover:text-white transition-colors">
+                    <!-- Lot badge -->
+                    <div class="hidden sm:flex items-center gap-6 text-white/70 text-sm">
+                        <div class="text-center">
+                            <div class="text-[10px] uppercase tracking-widest font-bold" style="color:#aebc82;">Sección</div>
+                            <div class="font-bold text-white text-base">{{ manzana }}</div>
+                        </div>
+                        <div class="w-px h-8 bg-white/15"></div>
+                        <div class="text-center">
+                            <div class="text-[10px] uppercase tracking-widest font-bold" style="color:#aebc82;">Lote</div>
+                            <div class="font-bold text-white text-base">{{ lote?.lote }}</div>
+                        </div>
+                        <div class="w-px h-8 bg-white/15"></div>
+                        <div class="text-center">
+                            <div class="text-[10px] uppercase tracking-widest font-bold" style="color:#aebc82;">m²</div>
+                            <div class="font-bold text-white text-base">{{ fmtArea(lote?.superficie) }}</div>
+                        </div>
+                    </div>
+                    <button @click="$emit('close')" class="text-white/40 hover:text-white transition-colors ml-4">
                         <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M6 18L18 6M6 6l12 12" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
                 <div class="flex flex-col lg:flex-row gap-0">
 
-                    <div class="flex-1 px-8 py-6 space-y-6">
+                    <!-- ── Left: form + table ────────────────────────────────── -->
+                    <div class="flex-1 px-8 py-6 space-y-5">
 
+                        <!-- Client fields -->
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Nombre Completo *</label>
+                                <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
+                                       style="color:#153f35;">Nombre Completo *</label>
                                 <input v-model="clienteNombre"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
+                                    style="border:1px solid rgba(21,63,53,.2); color:#153f35; background:#fff;
+                                           --tw-ring-color:rgba(21,63,53,.3);"
                                     placeholder="Tu nombre completo" />
                             </div>
                             <div>
-                                <label class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Teléfono * (10 dígitos)</label>
+                                <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
+                                       style="color:#153f35;">Teléfono * (10 dígitos)</label>
                                 <input
                                     :value="clienteTelefono"
                                     @keydown="!/^\d$/.test($event.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab'].includes($event.key) && $event.preventDefault()"
-                                    @input="clienteTelefono = $event.target.value = $event.target.value.replace(/\D/g, '').slice(0, 10)"
+                                    @input="clienteTelefono = $event.target.value = $event.target.value.replace(/\D/g,'').slice(0,10)"
                                     inputmode="numeric"
                                     maxlength="10"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    :class="{ 'border-red-400': clienteTelefono.length > 0 && clienteTelefono.length !== 10 }"
+                                    class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
+                                    :style="{
+                                        border: clienteTelefono.length > 0 && clienteTelefono.length !== 10
+                                            ? '1px solid #e53e3e'
+                                            : '1px solid rgba(21,63,53,.2)',
+                                        color: '#153f35', background: '#fff'
+                                    }"
                                     placeholder="10 dígitos" />
                             </div>
-                            <div>
-                                <label
-                                    class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Lote</label>
-                                <div
-                                    class="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-slate-50">
-                                    Sección <span class="font-bold">{{ manzana }}</span> – Lote <span
-                                        class="font-bold">{{ lote?.lote }}</span>
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Superficie</label>
-                                <div
-                                    class="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-slate-50 font-semibold">
-                                    {{ fmtArea(lote?.superficie) }} m²
-                                </div>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Precio
-                                    m²</label>
-                                <div
-                                    class="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-slate-50 font-semibold">
-                                    {{ fmt(lote?.precio) }}
-                                </div>
-                            </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label
-                                    class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Enganche
-                                    (%)</label>
-                                <select v-model="enganchePct"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option v-for="p in [10, 15, 20, 25, 30, 40, 50]" :key="p" :value="p">{{ p }}%
-                                    </option>
-                                </select>
-                            </div>
-                            <div>
-                                <label
-                                    class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Plazo
-                                    (meses)</label>
-                                <select v-model="plazoMeses"
-                                    class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option v-for="m in PLAZO_OPCIONES" :key="m" :value="m">{{ m }} meses</option>
-                                </select>
-                            </div>
-                        </div>
-
+                        <!-- Enganche + Plazo — with badge info -->
                         <div>
-                            <h3 class="text-sm font-bold text-gray-700 mb-3 uppercase tracking-wide">Tabla de Pagos</h3>
-                            <div class="overflow-auto max-h-64 rounded-lg border border-slate-100">
+                            <div class="flex items-center gap-3 mb-3">
+                                <span class="text-[10px] font-bold uppercase tracking-[.3em]" style="color:#153f35;">
+                                    Condiciones de Pago
+                                </span>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
+                                      style="background:rgba(174,188,130,.18); color:#153f35;">
+                                    Enganche desde 20%
+                                </span>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
+                                      style="background:rgba(174,188,130,.18); color:#153f35;">
+                                    Hasta 48 meses
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
+                                           style="color:#6b6b60;">Enganche (%)</label>
+                                    <select v-model="enganchePct"
+                                        class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
+                                        style="border:1px solid rgba(21,63,53,.2); color:#153f35; background:#fff;">
+                                        <option v-for="p in ENGANCHE_OPCIONES" :key="p" :value="p">{{ p }}%</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
+                                           style="color:#6b6b60;">Plazo (meses)</label>
+                                    <select v-model="plazoMeses"
+                                        class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
+                                        style="border:1px solid rgba(21,63,53,.2); color:#153f35; background:#fff;">
+                                        <option v-for="m in PLAZO_OPCIONES" :key="m" :value="m">{{ m }} meses</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment table -->
+                        <div>
+                            <h3 class="text-[10px] font-bold uppercase tracking-[.3em] mb-3"
+                                style="color:#153f35;">Tabla de Pagos</h3>
+                            <div class="overflow-auto max-h-64 rounded-xl" style="border:1px solid rgba(21,63,53,.1);">
                                 <table class="min-w-full text-xs">
-                                    <thead class="sticky top-0 bg-slate-900 text-white">
+                                    <thead class="sticky top-0" style="background:#153f35;">
                                         <tr>
-                                            <th class="py-2 px-3 text-center">No.</th>
-                                            <th class="py-2 px-3 text-right">Fecha</th>
-                                            <th class="py-2 px-3 text-right">Saldo Inicial</th>
-                                            <th class="py-2 px-3 text-right">Monto Pago</th>
-                                            <th class="py-2 px-3 text-right">Saldo Final</th>
+                                            <th class="py-2.5 px-3 text-center text-white font-bold tracking-wide">No.</th>
+                                            <th class="py-2.5 px-3 text-right text-white font-bold tracking-wide">Fecha</th>
+                                            <th class="py-2.5 px-3 text-right text-white font-bold tracking-wide">Saldo Inicial</th>
+                                            <th class="py-2.5 px-3 text-right font-bold tracking-wide" style="color:#aebc82;">Monto Pago</th>
+                                            <th class="py-2.5 px-3 text-right text-white font-bold tracking-wide">Saldo Final</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="row in tablaDePageos" :key="row.no"
-                                            class="border-b border-slate-50 even:bg-slate-50">
-                                            <td class="py-1.5 px-3 text-center font-semibold text-slate-700">{{ row.no }}</td>
-                                            <td class="py-1.5 px-3 text-right text-slate-500">{{ row.fecha }}</td>
-                                            <td class="py-1.5 px-3 text-right font-mono text-slate-600">{{ fmt(row.saldoInicial) }}</td>
-                                            <td class="py-1.5 px-3 text-right font-mono text-blue-700 font-semibold">{{ fmt(row.monto) }}</td>
-                                            <td class="py-1.5 px-3 text-right font-mono text-slate-600">{{ fmt(row.saldoFinal) }}</td>
+                                            class="border-b transition-colors hover:bg-opacity-50"
+                                            :style="row.no % 2 === 0
+                                                ? 'border-color:rgba(21,63,53,.06); background:#f6f6f4;'
+                                                : 'border-color:rgba(21,63,53,.06); background:#fff;'">
+                                            <td class="py-1.5 px-3 text-center font-bold" style="color:#153f35;">{{ row.no }}</td>
+                                            <td class="py-1.5 px-3 text-right" style="color:#6b6b60;">{{ row.fecha }}</td>
+                                            <td class="py-1.5 px-3 text-right font-mono" style="color:#6b6b60;">{{ fmt(row.saldoInicial) }}</td>
+                                            <td class="py-1.5 px-3 text-right font-mono font-bold" style="color:#153f35;">{{ fmt(row.monto) }}</td>
+                                            <td class="py-1.5 px-3 text-right font-mono" style="color:#6b6b60;">{{ fmt(row.saldoFinal) }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -341,148 +360,98 @@ watch(() => props.lote, () => {
 
                     </div>
 
-                    <div class="lg:w-72 bg-slate-50 border-l border-slate-100 px-6 py-6 flex flex-col gap-4">
-                        <h3 class="text-base font-extrabold text-gray-800">Resumen de Pago</h3>
+                    <!-- ── Right: summary + actions ──────────────────────────── -->
+                    <div class="lg:w-72 flex flex-col gap-4 px-6 py-6"
+                         style="background:#f6f6f4; border-left:1px solid rgba(21,63,53,.08);">
 
-                        <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-3 shadow-sm">
+                        <h3 class="text-[10px] font-bold uppercase tracking-[.35em]" style="color:#153f35;">
+                            Resumen de Pago
+                        </h3>
+
+                        <!-- Summary card -->
+                        <div class="rounded-xl p-4 space-y-3"
+                             style="background:#fff; border:1px solid rgba(21,63,53,.1); box-shadow:0 2px 12px rgba(21,63,53,.06);">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">Total:</span>
-                                <span class="font-bold text-gray-800">{{ fmt(precioTotal) }}</span>
+                                <span style="color:#6b6b60;">Total</span>
+                                <span class="font-bold" style="color:#153f35;">{{ fmt(precioTotal) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">Pago Inicial {{ enganchePct }}%:</span>
-                                <span class="font-bold text-emerald-700">{{ fmt(engancheAmt) }}</span>
+                                <span style="color:#6b6b60;">Enganche {{ enganchePct }}%</span>
+                                <span class="font-bold" style="color:#aebc82;">{{ fmt(engancheAmt) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">Saldo:</span>
-                                <span class="font-bold text-gray-800">{{ fmt(saldo) }}</span>
+                                <span style="color:#6b6b60;">Saldo a financiar</span>
+                                <span class="font-bold" style="color:#153f35;">{{ fmt(saldo) }}</span>
                             </div>
-                            <div class="border-t border-slate-100 pt-3">
-                                <div class="text-xs text-gray-500 mb-1 font-semibold">{{ plazoMeses }} Pagos de:</div>
-                                <div class="text-2xl font-black text-blue-900">{{ fmt(montoPago) }}</div>
-                                <div class="text-xs text-gray-400 mt-0.5">mensual</div>
+                            <div class="pt-3" style="border-top:1px solid rgba(21,63,53,.08);">
+                                <div class="text-[10px] font-bold uppercase tracking-widest mb-1" style="color:#aebc82;">
+                                    {{ plazoMeses }} pagos mensuales de
+                                </div>
+                                <div class="text-3xl font-bold" style="color:#153f35;">{{ fmt(montoPago) }}</div>
                             </div>
                         </div>
 
-                        <div
-                            class="bg-white rounded-xl border border-slate-200 p-4 space-y-1.5 text-xs text-slate-600 shadow-sm">
-                            <div class="flex justify-between gap-2">
-                                <span class="text-gray-400 uppercase tracking-wide font-semibold">Sección</span>
-                                <span class="font-bold">{{ manzana }}</span>
+                        <!-- Lot info card -->
+                        <div class="rounded-xl p-4 space-y-2 text-xs"
+                             style="background:#fff; border:1px solid rgba(21,63,53,.1);">
+                            <div class="flex justify-between">
+                                <span class="font-bold uppercase tracking-wide" style="color:#aebc82;">Sección</span>
+                                <span class="font-bold" style="color:#153f35;">{{ manzana }}</span>
                             </div>
-                            <div class="flex justify-between gap-2">
-                                <span class="text-gray-400 uppercase tracking-wide font-semibold">Lote</span>
-                                <span class="font-bold">{{ lote?.lote }}</span>
+                            <div class="flex justify-between">
+                                <span class="font-bold uppercase tracking-wide" style="color:#aebc82;">Lote</span>
+                                <span class="font-bold" style="color:#153f35;">{{ lote?.lote }}</span>
                             </div>
-                            <div class="flex justify-between gap-2">
-                                <span class="text-gray-400 uppercase tracking-wide font-semibold">m²</span>
-                                <span class="font-bold">{{ fmtArea(lote?.superficie) }}</span>
+                            <div class="flex justify-between">
+                                <span class="font-bold uppercase tracking-wide" style="color:#aebc82;">Superficie</span>
+                                <span class="font-bold" style="color:#153f35;">{{ fmtArea(lote?.superficie) }} m²</span>
                             </div>
-                            <div class="flex justify-between gap-2">
-                                <span class="text-gray-400 uppercase tracking-wide font-semibold">Categoría</span>
-                                <span class="font-bold">{{ lote?.categoria || '—' }}</span>
+                            <div class="flex justify-between">
+                                <span class="font-bold uppercase tracking-wide" style="color:#aebc82;">Categoría</span>
+                                <span class="font-bold" style="color:#153f35;">{{ lote?.categoria || '—' }}</span>
                             </div>
                         </div>
 
+                        <!-- Actions -->
                         <div class="space-y-2 mt-auto">
                             <button @click="enviarPorCorreo" :disabled="formularioInvalido"
-                                class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                class="w-full py-2.5 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
+                                style="background:#153f35; color:#fff;"
+                                :style="formularioInvalido ? 'opacity:.4; cursor:not-allowed;' : ''"
+                                @mouseenter="e => !formularioInvalido && (e.target.style.background='#0e2b25')"
+                                @mouseleave="e => e.target.style.background='#153f35'">
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                                 Enviar por Correo
                             </button>
-                            <button @click="imprimirCotizacion"
-                                class="w-full py-2.5 border-2 border-blue-600 text-blue-700 hover:bg-blue-50 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <button @click="descargarPDF"
+                                class="w-full py-2.5 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
+                                style="border:1.5px solid #153f35; color:#153f35; background:transparent;"
+                                @mouseenter="e => e.currentTarget.style.background='rgba(21,63,53,.06)'"
+                                @mouseleave="e => e.currentTarget.style.background='transparent'">
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                        d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a1 1 0 001 1h16a1 1 0 001-1v-3M3 10a9 9 0 1018 0" />
                                 </svg>
-                                Imprimir Cotización
+                                Descargar PDF
                             </button>
                             <button v-if="isAdmin" @click="reservarLote"
-                                class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 13l4 4L19 7" />
+                                class="w-full py-2.5 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
+                                style="background:#aebc82; color:#153f35;"
+                                @mouseenter="e => e.currentTarget.style.background='#beca90'"
+                                @mouseleave="e => e.currentTarget.style.background='#aebc82'">
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
                                 Apartar Lote (2 días)
                             </button>
                         </div>
-                    </div>
-                </div>
 
-                <div id="cotizacion-print-area" class="hidden">
-                    <div class="header">
-                        <div class="brand">RESERVA ALTA NORTE</div>
-                        <div class="sub">Ski, Camping &amp; Resort</div>
-                    </div>
-                    <table class="info">
-                        <tbody>
-                            <tr>
-                                <td>CLIENTE:</td>
-                                <td>{{ clienteNombre }}</td>
-                            </tr>
-                            <tr>
-                                <td>SECCIÓN:</td>
-                                <td>SECCIÓN {{ manzana }}</td>
-                            </tr>
-                            <tr>
-                                <td>LOTE:</td>
-                                <td>LOTE {{ lote?.lote }}</td>
-                            </tr>
-                            <tr>
-                                <td>MTS2:</td>
-                                <td>{{ fmtArea(lote?.superficie) }}</td>
-                            </tr>
-                            <tr>
-                                <td>PRECIO MTS2:</td>
-                                <td>{{ fmt(lote?.precio) }}</td>
-                            </tr>
-                            <tr>
-                                <td>PRECIO TOTAL:</td>
-                                <td>{{ fmt(precioTotal) }}</td>
-                            </tr>
-                            <tr>
-                                <td>ENGANCHE:</td>
-                                <td>{{ fmt(engancheAmt) }}</td>
-                            </tr>
-                            <tr>
-                                <td>SALDO:</td>
-                                <td>{{ fmt(saldo) }}</td>
-                            </tr>
-                            <tr>
-                                <td>PLAZOS:</td>
-                                <td>{{ plazoMeses }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table class="payments">
-                        <thead>
-                            <tr>
-                                <th>NO. PAGOS</th>
-                                <th>FECHA PAGO</th>
-                                <th>SALDO INICIAL</th>
-                                <th>MONTO PAGO</th>
-                                <th>SALDO FINAL</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="row in tablaDePageos" :key="row.no">
-                                <td>{{ row.no }}</td>
-                                <td>{{ row.fecha }}</td>
-                                <td>{{ fmt(row.saldoInicial) }}</td>
-                                <td>{{ fmt(row.monto) }}</td>
-                                <td>{{ fmt(row.saldoFinal) }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p class="note">NOTA: LOS PRECIOS PUEDEN CAMBIAR EN CUALQUIER MOMENTO SIN PREVIO AVISO.</p>
-                    <div class="footer">
-                        <span>© 2026 – Alta Norte</span>
-                        <span class="footer-center">RESERVA ALTA NORTE</span>
-                        <span>Página 1 de 1</span>
+                        <p class="text-[9px] text-center leading-relaxed" style="color:#6b6b60;">
+                            Los precios pueden cambiar sin previo aviso.
+                        </p>
                     </div>
                 </div>
 

@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 533" preserveAspectRatio="xMidYMid slice">
+  <!-- Sky background -->
+  <rect width="400" height="533" fill="#0d3028"/>
+
+  <!-- Stars scattered -->
+  <circle cx="30" cy="25" r="1.1" fill="white" opacity="0.7"/>
+  <circle cx="95" cy="15" r="0.9" fill="white" opacity="0.6"/>
+  <circle cx="165" cy="22" r="1.3" fill="white" opacity="0.8"/>
+  <circle cx="260" cy="10" r="0.9" fill="white" opacity="0.5"/>
+  <circle cx="340" cy="20" r="1.1" fill="white" opacity="0.65"/>
+  <circle cx="380" cy="35" r="0.8" fill="white" opacity="0.5"/>
+  <circle cx="55" cy="60" r="0.8" fill="white" opacity="0.45"/>
+  <circle cx="130" cy="50" r="1" fill="white" opacity="0.55"/>
+  <circle cx="310" cy="55" r="1.2" fill="white" opacity="0.5"/>
+  <circle cx="365" cy="65" r="0.9" fill="white" opacity="0.4"/>
+  <circle cx="20" cy="100" r="0.7" fill="white" opacity="0.35"/>
+  <circle cx="80" cy="90" r="1" fill="white" opacity="0.4"/>
+  <circle cx="220" cy="40" r="0.8" fill="white" opacity="0.55"/>
+  <circle cx="290" cy="80" r="0.9" fill="white" opacity="0.35"/>
+  <circle cx="390" cy="90" r="1" fill="white" opacity="0.3"/>
+  <circle cx="145" cy="85" r="1.1" fill="white" opacity="0.45"/>
+
+  <!-- Crescent Moon -->
+  <g transform="translate(310, 70)">
+    <circle cx="0" cy="0" r="30" fill="#153f35"/>
+    <circle cx="10" cy="-5" r="25" fill="#0d3028"/>
+  </g>
+
+  <!-- Mountain silhouettes (background) -->
+  <path d="M-10,350 L50,240 L110,300 L180,200 L250,280 L310,220 L370,260 L410,230 L410,400 L-10,400Z" fill="#0a2520"/>
+
+  <!-- Closer mountain range -->
+  <path d="M-10,400 L60,320 L110,360 L180,300 L240,350 L300,310 L360,340 L410,315 L410,460 L-10,460Z" fill="#0d2e26"/>
+
+  <!-- Ground / meadow -->
+  <path d="M-10,430 Q100,415 200,425 Q300,435 410,418 L410,533 L-10,533Z" fill="#091c17"/>
+
+  <!-- Human silhouettes (people by the fire) -->
+  <!-- Person 1 sitting -->
+  <g transform="translate(165, 430)" opacity="0.8">
+    <ellipse cx="0" cy="0" rx="12" ry="5" fill="#091c17"/>
+    <circle cx="0" cy="-15" r="5" fill="#091c17"/>
+    <path d="M-5,-10 L-10,0 M5,-10 L10,0" stroke="#091c17" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <!-- Person 2 sitting -->
+  <g transform="translate(235, 432)" opacity="0.8">
+    <ellipse cx="0" cy="0" rx="12" ry="5" fill="#091c17"/>
+    <circle cx="0" cy="-15" r="5" fill="#091c17"/>
+    <path d="M-5,-10 L-10,0 M5,-10 L10,0" stroke="#091c17" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Campfire -->
+  <g transform="translate(200, 432)">
+    <!-- Logs -->
+    <line x1="-12" y1="5" x2="12" y2="-2" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="-12" y1="-2" x2="12" y2="5" stroke="#5a3010" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Flames -->
+    <path d="M-6,0 Q-10,-15 -3,-22 Q-2,-10 0,-8 Q2,-18 6,-25 Q8,-12 5,-5 Q10,-16 12,-20 Q14,-8 8,0Z"
+          fill="#e8650a" opacity="0.9"/>
+    <path d="M-2,-5 Q-5,-17 0,-24 Q2,-14 2,-12 Q4,-20 7,-22 Q8,-12 5,-5Z"
+          fill="#f4a820" opacity="0.85"/>
+    <!-- Glow -->
+    <ellipse cx="0" cy="2" rx="18" ry="8" fill="#e8650a" opacity="0.15"/>
+    <ellipse cx="0" cy="5" rx="30" ry="12" fill="#e8650a" opacity="0.07"/>
+  </g>
+
+  <!-- Tent -->
+  <g transform="translate(200, 390)">
+    <!-- Tent body -->
+    <polygon points="-70,50 0,-35 70,50" fill="#153f35" stroke="#1d5445" stroke-width="1.5"/>
+    <!-- Tent highlight edge -->
+    <line x1="0" y1="-35" x2="-70" y2="50" stroke="#aebc82" stroke-width="1.5" opacity="0.7"/>
+    <!-- Tent door -->
+    <path d="M-10,50 Q0,30 10,50Z" fill="#0d2820" opacity="0.9"/>
+    <!-- Tent entry fold (right panel slightly visible) -->
+    <path d="M0,-35 L70,50 L55,50 L0,-20Z" fill="#1a4a3e" opacity="0.5"/>
+    <!-- Tent stake lines -->
+    <line x1="-70" y1="50" x2="-85" y2="62" stroke="#aebc82" stroke-width="1" opacity="0.5"/>
+    <line x1="70" y1="50" x2="85" y2="62" stroke="#aebc82" stroke-width="1" opacity="0.5"/>
+    <line x1="0" y1="-35" x2="0" y2="-50" stroke="#aebc82" stroke-width="1.2" opacity="0.4"/>
+  </g>
+
+  <!-- Pine trees (left cluster) -->
+  <g>
+    <polygon points="30,460 50,390 70,460" fill="#091f1a"/>
+    <polygon points="28,452 50,378 72,452" fill="#0d2820"/>
+    <polygon points="48,460 68,398 88,460" fill="#091f1a"/>
+    <polygon points="46,454 68,386 90,454" fill="#0d2820"/>
+    <polygon points="10,460 33,405 56,460" fill="#0a2220"/>
+  </g>
+  <!-- Pine trees (right cluster) -->
+  <g>
+    <polygon points="310,460 330,390 350,460" fill="#091f1a"/>
+    <polygon points="308,452 330,378 352,452" fill="#0d2820"/>
+    <polygon points="328,460 348,398 368,460" fill="#091f1a"/>
+    <polygon points="326,454 348,386 370,454" fill="#0d2820"/>
+    <polygon points="348,460 368,405 388,460" fill="#0a2220"/>
+  </g>
+
+  <!-- Fire light glow reflected on ground -->
+  <ellipse cx="200" cy="455" rx="50" ry="15" fill="#e8650a" opacity="0.06"/>
+
+  <!-- Vignette -->
+  <defs>
+    <radialGradient id="vig2" cx="50%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="rgba(0,0,0,0.5)"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="533" fill="url(#vig2)"/>
+</svg>
