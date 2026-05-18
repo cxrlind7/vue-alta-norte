@@ -185,15 +185,15 @@ const totalPrice = computed(() => {
         <template v-else>
           <div class="flex justify-between text-sm text-slate-600">
             <span>Superficie</span>
-            <span class="font-semibold">{{ formatArea(selectedLote.superficie) }} m²</span>
+            <span class="font-semibold color-green-500 text-slate-800">{{ formatArea(selectedLote.superficie) }} m²</span>
           </div>
           <div class="flex justify-between text-sm text-slate-600">
             <span>Precio / m²</span>
-            <span class="font-semibold">{{ formatCurrency(selectedLote.precio) }}</span>
+            <span class="font-semibold text-slate-800">{{ formatCurrency(selectedLote.precio) }}</span>
           </div>
           <div v-if="selectedLote.categoria" class="flex justify-between text-sm text-slate-600">
             <span>Categoría</span>
-            <span class="font-semibold">{{ selectedLote.categoria }}</span>
+            <span class="font-semibold text-slate-800">{{ selectedLote.categoria }}</span>
           </div>
 
           <div class="p-4 rounded-xl shadow-md" style="background-color:#153f35;">

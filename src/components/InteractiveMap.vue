@@ -399,11 +399,11 @@ function fmtArea(v) {
             <div class="px-4 py-3 space-y-1.5 text-sm">
               <div class="flex justify-between">
                 <span class="text-slate-500">Superficie</span>
-                <span class="font-bold">{{ fmtArea(hoveredLote.lote.superficie) }} m²</span>
+                <span class="font-bold text-blue-900">{{ fmtArea(hoveredLote.lote.superficie) }} m²</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-500">Precio / m²</span>
-                <span class="font-bold">{{ fmt(hoveredLote.lote.precio) }}</span>
+                <span class="font-bold text-blue-900">{{ fmt(hoveredLote.lote.precio) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-500">Total estimado</span>
