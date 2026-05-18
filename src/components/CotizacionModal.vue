@@ -16,10 +16,10 @@ const emit = defineEmits(['close', 'confirm'])
 const clienteNombre    = ref('')
 const clienteTelefono  = ref('')
 const enganchePct      = ref(20)
-const plazoMeses       = ref(24)
+const plazoMeses       = ref(48)
 
 // Financiamiento hasta 48 meses, enganche desde 20 %
-const PLAZO_OPCIONES    = [6, 12, 18, 24, 36, 48]
+const PLAZO_OPCIONES    = [48]
 const ENGANCHE_OPCIONES = [20, 25, 30, 40, 50]
 
 const formularioInvalido = computed(() =>
@@ -299,10 +299,10 @@ watch(() => props.lote, () => {
                                       style="background:rgba(174,188,130,.18); color:#153f35;">
                                     Enganche desde 20%
                                 </span>
-                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
+                                <!-- <span class="text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider"
                                       style="background:rgba(174,188,130,.18); color:#153f35;">
                                     Hasta 48 meses
-                                </span>
+                                </span> -->
                             </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
