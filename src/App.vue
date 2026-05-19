@@ -35,7 +35,7 @@
       <AboutSection />
       <AmenitiesSection />
       <LifestyleSection />
-      <PlansSection />
+      <!-- <PlansSection /> -->
       <TourSection />
       <ContactSection />
     </main>
