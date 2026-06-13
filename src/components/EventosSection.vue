@@ -31,18 +31,7 @@
         </div>
       </div>
 
-      <div class="an-inner" style="padding-top:32px; padding-bottom:100px;">
-        <div class="an-eventos-banner an-reveal">
-          <div style="flex:1; min-width:260px;">
-            <p class="an-tag-light" style="margin-bottom:8px;">{{ t.eventos.bannerTag }}</p>
-            <h3 class="an-eventos-banner-title">{{ t.eventos.bannerTitle }}</h3>
-            <p class="an-eventos-banner-sub">{{ t.eventos.bannerSub }}</p>
-          </div>
-          <button class="an-btn-gold" @click="scrollToSection('#recorrido-nuevo')">
-            {{ t.eventos.bannerBtn }}
-          </button>
-        </div>
-      </div>
+
 
     </div>
   </section>
