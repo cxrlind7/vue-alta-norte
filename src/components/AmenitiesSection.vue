@@ -20,6 +20,14 @@
     <div class="absolute top-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,#aebc82 30%,#aebc82 70%,transparent);"></div>
     <!-- Bottom accent line -->
     <div class="absolute bottom-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,#aebc82 30%,#aebc82 70%,transparent);"></div>
+    <!-- Background photo watermark -->
+    <div class="absolute inset-0 bg-cover bg-center pointer-events-none"
+         style="background-image:url('/images/hike.jpg'); opacity:0.06; mix-blend-mode:luminosity;"></div>
+    <!-- Inner vignette shadows -->
+    <div class="absolute top-0 left-0 right-0 h-28 pointer-events-none"
+         style="background:linear-gradient(to bottom,rgba(0,0,0,0.35),transparent);"></div>
+    <div class="absolute bottom-0 left-0 right-0 h-28 pointer-events-none"
+         style="background:linear-gradient(to top,rgba(0,0,0,0.35),transparent);"></div>
 
     <div class="relative max-w-7xl mx-auto px-6 lg:px-8">
 
@@ -136,9 +144,9 @@ onBeforeUnmount(() => observer?.disconnect())
   transition: transform .4s cubic-bezier(.25,.46,.45,.94), box-shadow .4s, background .3s, border-color .3s;
 }
 .amenity-card:hover {
-  transform: translateY(-6px);
+  transform: translateY(-8px);
   background: rgba(255,255,255,.07);
   border-color: rgba(174,188,130,.45);
-  box-shadow: 0 24px 52px rgba(0,0,0,.4), 0 0 28px rgba(174,188,130,.07);
+  box-shadow: 0 32px 72px rgba(0,0,0,.6), 0 0 48px rgba(174,188,130,.13), inset 0 1px 0 rgba(174,188,130,.18);
 }
 </style>

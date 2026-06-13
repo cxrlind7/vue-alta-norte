@@ -7,8 +7,8 @@
         style="background-image:url('/images/IMG_0881.JPG.jpeg');"
         ref="parallaxBg"
       ></div>
-      <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/75"></div>
-      <div class="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30"></div>
+      <!-- <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/45 to-black/75"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/30"></div> -->
     </div>
 
     <!-- CTAs -->
@@ -31,7 +31,7 @@
         class="group inline-flex items-center gap-3 px-10 py-4 rounded-full font-bold text-sm
                tracking-widest uppercase border-2 border-white/35 text-white
                hover:border-white hover:bg-white/10 transition-all duration-300 hover:scale-105"
-        @click="scrollTo('#planos')"
+        @click="scrollTo('#contacto')"
       >
         {{ t.hero.ctaLots }}
       </button>

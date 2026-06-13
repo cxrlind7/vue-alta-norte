@@ -1,98 +1,92 @@
 <template>
-  <section id="tour" class="py-24 bg-surface relative overflow-hidden" data-animate>
-    <!-- Background mountain silhouettes -->
-    <div class="absolute inset-0">
-      <svg viewBox="0 0 1200 600" class="absolute bottom-0 w-full h-auto opacity-20">
-        <path d="M0,600 L0,300 L200,200 L400,280 L600,150 L800,220 L1000,180 L1200,240 L1200,600 Z" fill="currentColor" class="text-primary-800" />
-      </svg>
+  <!-- ══ TOUR COVER — full-bleed ══ -->
+  <section
+    id="tour"
+    class="relative overflow-hidden cursor-pointer group"
+    style="min-height: 72vh;"
+    data-animate
+    @click="openAndStartTour"
+  >
+    <!-- Full-bleed panoramic photo -->
+    <div
+      class="absolute inset-0 bg-cover bg-center transition-transform duration-[1.4s] ease-out group-hover:scale-[1.03]"
+      style="background-image: url('/images/tour/hostal/Panorama1.webp');"
+    ></div>
+
+    <!-- Dark gradient overlay -->
+    <div class="absolute inset-0"
+         style="background: linear-gradient(
+           to bottom,
+           rgba(5,14,10,.55) 0%,
+           rgba(5,14,10,.30) 40%,
+           rgba(5,14,10,.65) 100%
+         );"></div>
+
+    <!-- Sage accent line top -->
+    <div class="absolute top-0 left-0 right-0 h-px"
+         style="background: linear-gradient(90deg, transparent, rgba(174,188,130,.5) 30%, rgba(174,188,130,.5) 70%, transparent);"></div>
+
+    <!-- Content -->
+    <div class="relative z-10 flex flex-col items-center justify-center text-center px-6"
+         style="min-height: 72vh; padding-top: 80px; padding-bottom: 80px;">
+
+      <!-- Badge -->
+      <p class="text-xs font-bold tracking-[.35em] uppercase mb-6"
+         style="color: rgba(174,188,130,.85);" data-animate-delay="100">
+        {{ t.tour.badge }}
+      </p>
+
+      <!-- Title -->
+      <h2 class="font-bold leading-none mb-6"
+          style="font-family:'Amble',sans-serif; font-size: clamp(52px,9vw,110px);
+                 color:#fff; letter-spacing:-.03em;" data-animate-delay="100">
+        360°
+        <span style="color:#aebc82;">TOUR</span>
+      </h2>
+
+      <!-- Subtitle -->
+      <p class="max-w-lg text-lg leading-relaxed mb-10"
+         style="color: rgba(255,255,255,.65); font-family:'Amble',sans-serif;" data-animate-delay="200">
+        {{ t.tour.subtitle }}
+      </p>
+
+      <!-- Play button -->
+      <button
+        class="relative flex items-center justify-center transition-all duration-500
+               group-hover:scale-110"
+        style="width:88px; height:88px; border-radius:50%;
+               background: rgba(174,188,130,.15);
+               border: 2px solid rgba(174,188,130,.55);
+               backdrop-filter: blur(12px);"
+        @click.stop="openAndStartTour"
+        aria-label="Iniciar tour virtual"
+      >
+        <!-- Pulse ring -->
+        <span class="absolute inset-0 rounded-full animate-ping"
+              style="background: rgba(174,188,130,.18); animation-duration:2s;"></span>
+        <!-- Play icon -->
+        <svg class="w-9 h-9 ml-1.5" fill="currentColor" viewBox="0 0 24 24" style="color:#aebc82;">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      </button>
+
+      <!-- CTA label -->
+      <p class="mt-5 text-xs font-bold tracking-[.22em] uppercase transition-opacity duration-300"
+         style="color: rgba(255,255,255,.45); font-family:'Amble',sans-serif;">
+        {{ t.tour.cta }}
+      </p>
+
     </div>
 
-    <div class="relative max-w-7xl mx-auto px-6 lg:px-8">
-      <div class="grid lg:grid-cols-2 gap-16 items-center">
-        <!-- Left Content -->
-        <div class="space-y-8" data-animate-delay="100">
-          <div class="space-y-6">
-            <h2 class="text-4xl lg:text-6xl font-bold text-white leading-tight">
-              360° VIRTUAL<br />
-              <span class="text-primary-300">TOUR</span>
-            </h2>
-            <p class="text-xl text-gray-300 leading-relaxed">
-              Realiza un recorrido virtual inmersivo de nuestra comunidad residencial y explora los impresionantes alrededores desde la comodidad de tu hogar
-            </p>
-          </div>
-          <div data-animate-delay="200">
-            <button
-              class="inline-flex items-center bg-primary hover:bg-primary-700 text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 shadow-lg group"
-              @click="openTour"
-            >
-              <span>INICIAR TOUR</span>
-              <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- Right Preview — click to open tour -->
-        <div class="relative cursor-pointer group" data-animate-delay="200" @click="openAndStartTour">
-          <div class="relative">
-            <div class="aspect-square bg-gradient-to-br from-primary-600 via-secondary-600 to-primary-800 rounded-2xl relative overflow-hidden shadow-2xl">
-              <div class="h-full w-full bg-cover bg-center bg-no-repeat opacity-70 transition-transform duration-700 group-hover:scale-105"
-                   style="background-image: url('/images/tour.jpg')"></div>
-            </div>
-            <div class="absolute inset-0 bg-black/30 rounded-2xl transition-colors duration-300 group-hover:bg-black/45"></div>
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="text-center text-white space-y-6">
-                <div class="relative">
-                  <div class="w-24 h-24 mx-auto bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/20
-                              transition-all duration-300 group-hover:bg-white/20 group-hover:scale-110">
-                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <div class="absolute inset-0 border-2 border-white/30 rounded-full animate-spin" style="animation-duration:8s"></div>
-                </div>
-                <div class="space-y-2">
-                  <p class="text-2xl font-bold text-white">Tour Virtual 360°</p>
-                  <p class="text-sm text-white/60 tracking-wide uppercase font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    Click para explorar
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Sage accent line bottom -->
+    <div class="absolute bottom-0 left-0 right-0 h-px"
+         style="background: linear-gradient(90deg, transparent, rgba(174,188,130,.3) 30%, rgba(174,188,130,.3) 70%, transparent);"></div>
+  </section>
 
     <!-- Tour Modal/Fullscreen -->
     <Teleport to="body">
       <div v-if="tourOpen" class="fixed inset-0 z-[100] bg-black">
         <div class="h-screen relative overflow-hidden">
-
-          <!-- Loading screen before tour starts -->
-          <div
-            v-if="!tourStarted"
-            class="absolute inset-0 flex items-center justify-center bg-gradient-to-t from-surface via-surface/90 to-surface/60 z-50"
-          >
-            <div class="text-center space-y-8 p-8">
-              <div class="space-y-4">
-                <h2 class="text-4xl md:text-6xl font-bold text-white leading-tight">
-                  Tour Virtual<span class="block text-primary-300">360°</span>
-                </h2>
-                <p class="text-xl text-gray-300 max-w-md mx-auto">Explora Alta Norte desde la comodidad de tu hogar</p>
-              </div>
-              <button
-                class="inline-flex items-center bg-primary hover:bg-primary-700 text-white font-bold text-xl px-8 py-4 rounded-full transition-all duration-300 hover:scale-105 shadow-xl group"
-                @click="startTour"
-              >
-                <svg class="mr-3 w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Iniciar Tour
-              </button>
-            </div>
-          </div>
 
           <!-- Loading indicator while panorama loads -->
           <div
@@ -178,7 +172,7 @@
                 <svg class="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
                 </svg>
-                Arrastra · Zoom
+                {{ t.tour.dragHint }}
               </div>
               <!-- Sound toggle -->
               <button
@@ -198,7 +192,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
                 </svg>
-                {{ soundMuted ? 'Sonido' : 'Sonido' }}
+                {{ t.tour.soundLabel }}
               </button>
             </div>
 
@@ -217,15 +211,16 @@
         </div>
       </div>
     </Teleport>
-  </section>
 </template>
 
 <script setup>
 import { ref, computed, onUnmounted, nextTick } from 'vue'
 import * as THREE from 'three'
 import { useTourState } from '../composables/useTourState'
+import { useI18n } from '../composables/useI18n.js'
 
 const { tourOpen } = useTourState()
+const { t } = useI18n()
 const tourStarted = ref(false)
 const menuOpen    = ref(false)
 const isLoading   = ref(false)
@@ -234,20 +229,20 @@ const currentRoomIndex = ref(0)
 const soundMuted  = ref(false)
 
 const rooms = [
-  { name: 'Salón Principal', area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama5.jpg' },
-  { name: 'Vista 2',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama4.png' },
-  { name: 'Vista 3',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama6.png' },
-  { name: 'Vista 4',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama6_001.png' },
-  { name: 'Vista 5',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama7.jpg' },
-  { name: 'Vista 1',         area: 'Salón',          category: 'Áreas Sociales',        image: '/images/tour/salon/Panorama4.png' },
-  { name: 'Vista 2',         area: 'Salón',          category: 'Áreas Sociales',        image: '/images/tour/salon/Panorama5.png' },
-  { name: 'Vista 1',         area: 'Palapa',         category: 'Áreas Sociales',        image: '/images/tour/palapa/Panorama5.jpg' },
-  { name: 'Vista 1',         area: 'Hostal',         category: 'Áreas Sociales',        image: '/images/tour/hostal/Panorama1.jpg' },
-  { name: 'Vista 2',         area: 'Hostal',         category: 'Áreas Sociales',        image: '/images/tour/hostal/Panorama2.jpg' },
-  { name: 'Vista 1',         area: 'Área de Esquí',  category: 'Instalaciones',         image: '/images/tour/ski/Panorama6.jpg' },
-  { name: 'Vista 2',         area: 'Área de Esquí',  category: 'Instalaciones',         image: '/images/tour/ski/Panorama7_000.jpg' },
-  { name: 'Vista 1',         area: 'Stand de Tiro',  category: 'Instalaciones',         image: '/images/tour/stand de tiro/Panorama7.jpg' },
-  { name: 'Vista 2',         area: 'Stand de Tiro',  category: 'Instalaciones',         image: '/images/tour/stand de tiro/Panorama8_000.jpg' },
+  { name: 'Salón Principal', area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama5.webp' },
+  { name: 'Vista 2',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama4.webp' },
+  { name: 'Vista 3',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama6.webp' },
+  { name: 'Vista 4',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama6_001.webp' },
+  { name: 'Vista 5',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama7.webp' },
+  { name: 'Vista 1',         area: 'Salón',          category: 'Áreas Sociales',        image: '/images/tour/salon/Panorama4.webp' },
+  { name: 'Vista 2',         area: 'Salón',          category: 'Áreas Sociales',        image: '/images/tour/salon/Panorama5.webp' },
+  { name: 'Vista 1',         area: 'Palapa',         category: 'Áreas Sociales',        image: '/images/tour/palapa/Panorama5.webp' },
+  { name: 'Vista 1',         area: 'Hostal',         category: 'Áreas Sociales',        image: '/images/tour/hostal/Panorama1.webp' },
+  { name: 'Vista 2',         area: 'Hostal',         category: 'Áreas Sociales',        image: '/images/tour/hostal/Panorama2.webp' },
+  { name: 'Vista 1',         area: 'Área de Esquí',  category: 'Instalaciones',         image: '/images/tour/ski/Panorama6.webp' },
+  { name: 'Vista 2',         area: 'Área de Esquí',  category: 'Instalaciones',         image: '/images/tour/ski/Panorama7_000.webp' },
+  { name: 'Vista 1',         area: 'Stand de Tiro',  category: 'Instalaciones',         image: '/images/tour/stand de tiro/Panorama7.webp' },
+  { name: 'Vista 2',         area: 'Stand de Tiro',  category: 'Instalaciones',         image: '/images/tour/stand de tiro/Panorama8_000.webp' },
 ]
 
 const currentRoom = ref(rooms[0])

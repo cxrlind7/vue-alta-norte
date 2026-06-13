@@ -89,7 +89,7 @@
                    focus:outline-none focus:ring-4 focus:ring-secondary/40
                    group relative overflow-hidden tracking-widest text-sm uppercase"
             style="background-color:#aebc82; color:#153f35;"
-            @click="scrollTo('#planos')"
+            @click="scrollTo('#contacto')"
           >
             <span class="relative z-10">{{ t.nav.cta }}</span>
             <svg class="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +163,7 @@
                        transition-all duration-300 hover:scale-[1.02] hover:shadow-lg
                        focus:outline-none focus:ring-4 focus:ring-secondary/40 text-sm"
                 style="background-color:#aebc82; color:#153f35;"
-                @click="mobileNavClick('#planos')"
+                @click="mobileNavClick('#contacto')"
               >
                 {{ t.nav.ctaMobile }}
               </button>

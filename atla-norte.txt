@@ -1,0 +1,893 @@
+﻿
+
+const HTML_CODE = `<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserva Alta Norte — Ski, Camping & Resort | Sierra Madre</title>
+<meta name="description" content="Desarrollo exclusivo en la Sierra Madre. A 50 minutos de Durango.">
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+
+<!-- ═══════════════════════════════════════
+  INSTRUCCIONES PARA LOVABLE / DESARROLLADOR
+  1. Copia TODO este código
+  2. En Lovable: escribe "Integra este hero slider 
+     antes de la sección Nosotros" y pega el código
+  3. Busca → IMAGEN 1/2/3 y agrega tus fotos reales:
+     background-image: url('/tu-foto.jpg')
+═══════════════════════════════════════ -->
+
+
+<style>
+/* ── VARIABLES ── */
+:root {
+  --forest: #0e1f0d; --forest-2: #172e15; --forest-3: #1f3d1c;
+  --accent: #4a8f3f; --lime: #8bc34a;
+  --gold: #c9a84c; --gold-dim: rgba(201,168,76,.35);
+  --cream: #f4efe4; --cream-2: #ede7d8;
+  --white: #fdfcf8; --text: #111a10;
+  --muted: rgba(255,255,255,.5); --muted-2: rgba(255,255,255,.25);
+  --r: 10px; --transition: cubic-bezier(.25,.46,.45,.94);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'Cabinet Grotesk',sans-serif;
+  background:var(--forest); color:var(--white);
+  cursor:none; overflow-x:hidden;
+}
+
+
+/* ── CURSOR ── */
+#cursor {
+  position:fixed; width:12px; height:12px;
+  background:var(--gold); border-radius:50%;
+  pointer-events:none; z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:width .2s,height .2s,background .2s;
+}
+#cursor-ring {
+  position:fixed; width:36px; height:36px;
+  border:1.5px solid rgba(201,168,76,.5);
+  border-radius:50%; pointer-events:none; z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:transform .12s,width .25s,height .25s;
+}
+.cursor-grow #cursor { width:40px; height:40px; background:rgba(201,168,76,.15); }
+.cursor-grow #cursor-ring { width:56px; height:56px; }
+
+
+/* ── PROGRESS BAR ── */
+#progress {
+  position:fixed; top:0; left:0; height:2px;
+  background:linear-gradient(90deg,var(--gold),var(--lime));
+  z-index:1000; transition:width .1s linear; width:0%;
+}
+
+
+/* ── INTRO SPLASH ── */
+#intro {
+  position:fixed; inset:0; z-index:9000;
+  background:var(--forest);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  transition:opacity .8s cubic-bezier(.77,0,.18,1),transform .8s cubic-bezier(.77,0,.18,1);
+}
+#intro.done { opacity:0; transform:translateY(-40px); pointer-events:none; }
+.intro-mountains { position:absolute; bottom:0; left:0; right:0; height:180px; overflow:hidden; }
+.intro-badge {
+  font-size:10px; font-weight:700; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--gold);
+  opacity:0; transform:translateY(8px);
+  animation:fadeUp .6s .3s forwards;
+}
+.intro-title-wrap { overflow:hidden; margin:12px 0 8px; }
+.intro-title {
+  font-family:'Instrument Serif',serif;
+  font-size:clamp(52px,9vw,110px);
+  font-weight:400; color:var(--white);
+  letter-spacing:-.02em; line-height:1;
+  transform:translateY(100%);
+  animation:titleUp .9s .5s cubic-bezier(.77,0,.18,1) forwards;
+  white-space:nowrap;
+}
+.intro-title span { color:var(--gold); }
+.intro-sub {
+  font-size:13px; font-weight:500; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted);
+  opacity:0; animation:fadeUp .6s .9s forwards;
+}
+.intro-line {
+  width:0; height:1px; background:var(--gold-dim); margin:24px 0;
+  animation:lineGrow .8s 1s forwards;
+}
+.intro-loading { display:flex; gap:6px; opacity:0; animation:fadeUp .5s 1.2s forwards; }
+.intro-dot {
+  width:5px; height:5px; border-radius:50%; background:var(--gold); opacity:.3;
+}
+.intro-dot:nth-child(1){animation:dotPulse 1.2s 1.3s ease-in-out infinite;}
+.intro-dot:nth-child(2){animation:dotPulse 1.2s 1.5s ease-in-out infinite;}
+.intro-dot:nth-child(3){animation:dotPulse 1.2s 1.7s ease-in-out infinite;}
+@keyframes dotPulse{0%,100%{opacity:.3;transform:scale(1);}50%{opacity:1;transform:scale(1.4);}}
+@keyframes titleUp{to{transform:translateY(0);}}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+@keyframes lineGrow{to{width:200px;}}
+
+
+/* ── HERO SLIDER ── */
+.hero-slider {
+  position:relative; width:100%; height:100vh;
+  min-height:600px; overflow:hidden; background:#0e1f0d;
+}
+.hs-slide {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity 1.2s ease; pointer-events:none;
+}
+.hs-slide.active { opacity:1; pointer-events:all; }
+.hs-slide-bg {
+  position:absolute; inset:0;
+  background-size:cover; background-position:center;
+  transform:scale(1.04); transition:transform 6s ease;
+}
+.hs-slide.active .hs-slide-bg { transform:scale(1); }
+.hs-overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom,rgba(10,20,8,.25),rgba(10,20,8,.45),rgba(10,20,8,.75));
+}
+.hs-content {
+  position:relative; z-index:2;
+  text-align:center; padding:0 24px; max-width:860px; width:100%;
+}
+.hs-eyebrow {
+  display:inline-block; font-size:11px; font-weight:700;
+  letter-spacing:.22em; text-transform:uppercase; color:#c9a84c;
+  margin-bottom:20px; opacity:0; transform:translateY(14px);
+  transition:opacity .7s .3s ease,transform .7s .3s ease;
+}
+.hs-slide.active .hs-eyebrow { opacity:1; transform:translateY(0); }
+.hs-title {
+  font-size:clamp(36px,5.5vw,64px); font-weight:800;
+  color:#fff; line-height:1.1; letter-spacing:-.02em; margin-bottom:18px;
+  opacity:0; transform:translateY(22px);
+  transition:opacity .8s .5s ease,transform .8s .5s ease;
+}
+.hs-slide.active .hs-title { opacity:1; transform:translateY(0); }
+.hs-title span { color:#c9a84c; }
+.hs-subtitle {
+  font-size:clamp(15px,1.8vw,18px); font-weight:400;
+  color:rgba(255,255,255,.68); line-height:1.75; margin-bottom:28px;
+  opacity:0; transform:translateY(16px);
+  transition:opacity .7s .7s ease,transform .7s .7s ease;
+}
+.hs-slide.active .hs-subtitle { opacity:1; transform:translateY(0); }
+.hs-pills {
+  display:flex; gap:10px; justify-content:center; flex-wrap:wrap;
+  margin-bottom:32px; opacity:0; transform:translateY(12px);
+  transition:opacity .6s .9s ease,transform .6s .9s ease;
+}
+.hs-slide.active .hs-pills { opacity:1; transform:translateY(0); }
+.hs-pill { padding:6px 16px; border-radius:999px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+.hs-pill-gold { background:rgba(201,168,76,.15); border:1px solid rgba(201,168,76,.4); color:#c9a84c; }
+.hs-pill-white { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); color:rgba(255,255,255,.75); }
+.hs-ctas {
+  display:flex; gap:14px; justify-content:center; flex-wrap:wrap;
+  opacity:0; transform:translateY(12px);
+  transition:opacity .6s 1.1s ease,transform .6s 1.1s ease;
+}
+.hs-slide.active .hs-ctas { opacity:1; transform:translateY(0); }
+.hs-btn-primary {
+  padding:14px 32px; border-radius:999px; background:#c9a84c; color:#0e1f0d;
+  font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  border:none; cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:background .2s,transform .2s;
+}
+.hs-btn-primary:hover { background:#e0be5e; transform:translateY(-2px); }
+.hs-btn-secondary {
+  padding:14px 32px; border-radius:999px; background:transparent; color:#fff;
+  font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase;
+  border:1.5px solid rgba(255,255,255,.3); cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:border-color .2s,color .2s;
+}
+.hs-btn-secondary:hover { border-color:#c9a84c; color:#c9a84c; }
+.hs-distance {
+  position:absolute; top:24px; right:24px; z-index:10;
+  background:rgba(10,20,8,.8); border:1px solid rgba(201,168,76,.3);
+  border-radius:10px; padding:12px 16px; text-align:center;
+  backdrop-filter:blur(8px);
+}
+.hs-dist-num { font-size:22px; font-weight:800; color:#c9a84c; line-height:1; }
+.hs-dist-label { font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.45); margin-top:3px; }
+.hs-arrow {
+  position:absolute; top:50%; transform:translateY(-50%); z-index:10;
+  width:44px; height:44px; border-radius:50%;
+  background:rgba(10,20,8,.65); border:1px solid rgba(255,255,255,.15);
+  color:#fff; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter:blur(4px); transition:background .2s,border-color .2s;
+}
+.hs-arrow:hover { background:rgba(201,168,76,.2); border-color:rgba(201,168,76,.5); }
+.hs-arrow-left { left:20px; }
+.hs-arrow-right { right:20px; }
+.hs-dots {
+  position:absolute; bottom:24px; left:50%; transform:translateX(-50%);
+  display:flex; gap:8px; z-index:10;
+}
+.hs-dot {
+  width:7px; height:7px; border-radius:999px;
+  background:rgba(255,255,255,.3); cursor:pointer;
+  transition:all .35s ease; border:none; padding:0;
+}
+.hs-dot.active { width:28px; background:#c9a84c; }
+.hs-progress { position:absolute; bottom:0; left:0; right:0; height:3px; background:rgba(255,255,255,.1); z-index:10; }
+.hs-progress-fill { height:100%; background:linear-gradient(90deg,#c9a84c,#8bc34a); width:0%; transition:width 5s linear; }
+.hs-scroll { position:absolute; bottom:20px; right:24px; z-index:10; display:flex; flex-direction:column; align-items:center; gap:5px; }
+.hs-scroll span { font-size:9px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.3); }
+.hs-scroll-line { width:1px; height:28px; background:linear-gradient(#c9a84c,transparent); animation:scrollPulse 2s ease-in-out infinite; }
+@keyframes scrollPulse { 0%,100%{opacity:.3;transform:scaleY(1);}50%{opacity:1;transform:scaleY(.7);} }
+
+
+/* ── BASE SECTIONS ── */
+section { position:relative; overflow:hidden; }
+.inner { max-width:1200px; margin:0 auto; padding:0 48px; }
+.tag { display:inline-flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; }
+.tag::before { content:''; width:24px; height:1px; background:var(--gold); }
+h2.serif { font-family:'Instrument Serif',serif; font-size:clamp(40px,5.5vw,72px); font-weight:400; line-height:1.05; color:var(--white); }
+h2.serif em { color:var(--gold); font-style:italic; }
+h2.dark-serif { color:var(--text); }
+h2.dark-serif em { color:var(--accent); }
+p.lead { font-size:17px; font-weight:400; line-height:1.8; color:var(--muted); max-width:520px; margin-top:16px; }
+p.lead-dark { color:rgba(17,26,16,.65); }
+.btn { display:inline-flex; align-items:center; gap:10px; padding:14px 30px; border-radius:999px; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:none; border:none; font-family:'Cabinet Grotesk',sans-serif; transition:all .3s; text-decoration:none; }
+.btn-gold { background:var(--gold); color:var(--forest); }
+.btn-gold:hover { background:#e0be5e; transform:translateY(-2px); }
+.btn-ghost { background:transparent; color:var(--white); border:1.5px solid rgba(255,255,255,.25); }
+.btn-ghost:hover { border-color:var(--gold); color:var(--gold); }
+.btn-arrow { transition:transform .2s; }
+.btn:hover .btn-arrow { transform:translateX(4px); }
+.reveal { opacity:0; transform:translateY(32px); transition:opacity .7s,transform .7s; }
+.reveal.in { opacity:1; transform:translateY(0); }
+.reveal-l { opacity:0; transform:translateX(-32px); transition:opacity .7s,transform .7s; }
+.reveal-l.in { opacity:1; transform:translateX(0); }
+.reveal-r { opacity:0; transform:translateX(32px); transition:opacity .7s,transform .7s; }
+.reveal-r.in { opacity:1; transform:translateX(0); }
+[data-delay="1"]{transition-delay:.1s;} [data-delay="2"]{transition-delay:.2s;} [data-delay="3"]{transition-delay:.3s;} [data-delay="4"]{transition-delay:.4s;}
+
+
+/* ── ACTIVIDADES ── */
+#actividades { padding:100px 0 80px; background:var(--cream); }
+.act-header { padding:0 48px; max-width:1200px; margin:0 auto 60px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:24px; }
+.act-filter { display:flex; gap:8px; flex-wrap:wrap; }
+.filter-btn { padding:8px 18px; border-radius:999px; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; cursor:none; border:1.5px solid rgba(17,26,16,.15); background:transparent; color:rgba(17,26,16,.5); font-family:'Cabinet Grotesk',sans-serif; transition:all .25s; }
+.filter-btn.active,.filter-btn:hover { background:var(--forest); color:var(--white); border-color:var(--forest); }
+.act-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; padding:0 48px; max-width:1200px; margin:0 auto; }
+.act-card { background:var(--white); padding:28px 24px; transition:all .4s; cursor:none; position:relative; overflow:hidden; }
+.act-card::after { content:''; position:absolute; bottom:0; left:0; height:3px; width:0; background:var(--accent); transition:width .3s; }
+.act-card:hover::after { width:100%; }
+.act-card:hover { background:var(--forest); transform:translateY(-2px); z-index:2; }
+.act-card:hover .act-name { color:var(--white); }
+.act-card:hover .act-cat { color:var(--gold); }
+.act-card.hidden { display:none; }
+.act-icon-wrap { width:52px; height:52px; border-radius:var(--r); background:rgba(17,26,16,.06); border:1px solid rgba(17,26,16,.08); display:flex; align-items:center; justify-content:center; font-size:22px; margin-bottom:16px; transition:all .3s; }
+.act-cat { font-size:10px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+.act-name { font-size:15px; font-weight:700; color:var(--text); line-height:1.3; transition:color .3s; }
+
+
+/* ── LLEGAR ── */
+#llegar { padding:100px 0; background:var(--forest); }
+.llegar-layout { display:grid; grid-template-columns:1fr 1.2fr; gap:0; align-items:stretch; }
+.llegar-left { padding:64px 48px; background:var(--forest-2); }
+.llegar-right { background:var(--forest-3); position:relative; overflow:hidden; min-height:600px; }
+.map-svg-wrap { width:100%; height:100%; display:flex; align-items:center; justify-content:center; padding:40px; }
+.route-line { stroke-dasharray:600; stroke-dashoffset:600; transition:stroke-dashoffset 1.2s; }
+.route-line.draw { stroke-dashoffset:0; }
+.pin-pulse { animation:pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.4);} }
+.rutas-list { display:flex; flex-direction:column; gap:4px; margin-top:40px; }
+.ruta { padding:18px 20px; border-radius:var(--r); border:1px solid rgba(255,255,255,.08); display:flex; gap:16px; align-items:center; cursor:none; transition:all .3s; background:transparent; }
+.ruta:hover,.ruta.active { background:rgba(255,255,255,.06); border-color:var(--gold-dim); }
+.ruta-emoji { font-size:20px; flex-shrink:0; }
+.ruta-info { flex:1; }
+.ruta-from { font-size:13px; font-weight:700; color:var(--white); }
+.ruta-time { font-size:22px; font-weight:900; color:var(--gold); line-height:1; }
+.ruta-detail { font-size:12px; color:var(--muted); margin-top:3px; line-height:1.4; }
+.ruta-chevron { font-size:18px; color:var(--muted-2); transition:color .2s,transform .2s; }
+.ruta:hover .ruta-chevron,.ruta.active .ruta-chevron { color:var(--gold); transform:translateX(4px); }
+.pasos-accordion { margin-top:32px; }
+.paso-item { border-bottom:1px solid rgba(255,255,255,.08); overflow:hidden; }
+.paso-trigger { width:100%; display:flex; align-items:center; gap:14px; padding:14px 0; background:none; border:none; cursor:none; font-family:'Cabinet Grotesk',sans-serif; text-align:left; }
+.paso-num-badge { width:28px; height:28px; border-radius:50%; background:var(--gold-dim); border:1px solid var(--gold-dim); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--gold); flex-shrink:0; }
+.paso-trigger-text { font-size:14px; font-weight:600; color:var(--white); flex:1; }
+.paso-trigger-icon { font-size:16px; color:var(--muted-2); transition:transform .3s; }
+.paso-item.open .paso-trigger-icon { transform:rotate(45deg); }
+.paso-body { max-height:0; overflow:hidden; transition:max-height .4s,padding .3s; padding:0 0 0 42px; }
+.paso-item.open .paso-body { max-height:120px; padding-bottom:14px; }
+.paso-body p { font-size:13px; color:var(--muted); line-height:1.6; }
+.paso-body strong { color:var(--white); }
+
+
+/* ── CLIMA ── */
+#clima { padding:100px 0; background:var(--cream-2); }
+.clima-tabs { display:flex; gap:4px; margin-bottom:56px; background:rgba(17,26,16,.08); border-radius:999px; padding:4px; width:fit-content; }
+.clima-tab { padding:10px 24px; border-radius:999px; font-size:13px; font-weight:700; cursor:none; border:none; background:transparent; color:rgba(17,26,16,.5); font-family:'Cabinet Grotesk',sans-serif; transition:all .3s; }
+.clima-tab.active { background:var(--forest); color:var(--white); }
+.clima-panel { display:none; }
+.clima-panel.active { display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:start; }
+.temp-big { font-family:'Instrument Serif',serif; font-size:96px; font-weight:400; color:var(--forest); line-height:1; margin-bottom:8px; }
+.temp-range { font-size:16px; color:rgba(17,26,16,.5); margin-bottom:24px; }
+.clima-desc { font-size:16px; color:rgba(17,26,16,.7); line-height:1.7; margin-bottom:32px; }
+.clima-tags { display:flex; gap:8px; flex-wrap:wrap; }
+.clima-tag { padding:6px 14px; border-radius:999px; font-size:12px; font-weight:700; background:rgba(17,26,16,.08); color:var(--text); }
+.vest-grid { display:flex; flex-direction:column; gap:12px; }
+.vest-card { background:var(--white); border-radius:var(--r); padding:18px 20px; display:flex; gap:14px; align-items:flex-start; border:1px solid rgba(17,26,16,.08); transition:border-color .25s,transform .25s; cursor:none; }
+.vest-card:hover { border-color:var(--accent); transform:translateX(4px); }
+.vest-e { font-size:22px; flex-shrink:0; }
+.vest-t { font-size:14px; font-weight:700; color:var(--text); margin-bottom:3px; }
+.vest-d { font-size:13px; color:rgba(17,26,16,.55); line-height:1.5; }
+
+
+/* ── EVENTOS ── */
+#eventos { padding:100px 0; background:var(--forest); }
+.eventos-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; margin-top:56px; }
+.ev-card { position:relative; overflow:hidden; min-height:460px; cursor:none; background:var(--forest-2); }
+.ev-bg { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:100px; opacity:.06; transition:transform .6s,opacity .4s; }
+.ev-card:hover .ev-bg { transform:scale(1.15); opacity:.08; }
+.ev-content { position:relative; z-index:1; padding:40px 32px; height:100%; display:flex; flex-direction:column; }
+.ev-tag { font-size:10px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; }
+.ev-title { font-family:'Instrument Serif',serif; font-size:clamp(22px,2.5vw,30px); font-weight:400; color:var(--white); line-height:1.2; margin-bottom:16px; }
+.ev-desc { font-size:14px; color:var(--muted); line-height:1.7; margin-bottom:24px; flex:1; }
+.ev-features { list-style:none; display:flex; flex-direction:column; gap:8px; margin-bottom:28px; }
+.ev-features li { font-size:13px; color:var(--muted); display:flex; gap:10px; align-items:center; transform:translateX(-10px); opacity:0; transition:transform .4s,opacity .4s; }
+.ev-features li::before { content:'✓'; color:var(--gold); font-weight:700; flex-shrink:0; }
+.ev-card:hover .ev-features li { transform:translateX(0); opacity:1; }
+.ev-card:hover .ev-features li:nth-child(1){transition-delay:.05s;} .ev-card:hover .ev-features li:nth-child(2){transition-delay:.1s;} .ev-card:hover .ev-features li:nth-child(3){transition-delay:.15s;} .ev-card:hover .ev-features li:nth-child(4){transition-delay:.2s;}
+.ev-cta { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); background:none; border:none; cursor:none; font-family:'Cabinet Grotesk',sans-serif; transition:gap .2s; }
+.ev-cta::after { content:'→'; }
+.ev-line { position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--gold); transform:scaleX(0); transform-origin:left; transition:transform .4s; }
+.ev-card:hover .ev-line { transform:scaleX(1); }
+
+
+/* ── RECORRIDO ── */
+#recorrido { padding:100px 0; background:var(--cream); }
+.rec-layout { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
+.tl-item { display:flex; gap:20px; padding-bottom:32px; opacity:0; transform:translateX(-16px); transition:opacity .5s,transform .5s; }
+.tl-item.in { opacity:1; transform:translateX(0); }
+.tl-left { display:flex; flex-direction:column; align-items:center; width:44px; flex-shrink:0; }
+.tl-dot { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; z-index:1; background:var(--forest); border:2px solid var(--gold-dim); transition:border-color .3s,box-shadow .3s; }
+.tl-item:hover .tl-dot { border-color:var(--gold); box-shadow:0 0 0 6px rgba(201,168,76,.12); }
+.tl-line { flex:1; width:1px; background:linear-gradient(var(--forest),rgba(17,26,16,.08)); margin-top:4px; }
+.tl-item:last-child .tl-line { display:none; }
+.tl-body { padding-top:8px; }
+.tl-title { font-size:16px; font-weight:700; color:var(--text); margin-bottom:4px; }
+.tl-desc { font-size:13px; color:rgba(17,26,16,.6); line-height:1.6; }
+.tl-time { font-size:11px; font-weight:700; color:var(--accent); margin-top:4px; letter-spacing:.06em; text-transform:uppercase; }
+.regalo-reveal { margin-top:32px; background:var(--forest); border-radius:16px; padding:28px; position:relative; overflow:hidden; }
+.regalo-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.regalo-header h3 { font-size:17px; font-weight:700; color:var(--white); }
+.gift-spin { font-size:28px; display:inline-block; animation:giftFloat 3s ease-in-out infinite; }
+@keyframes giftFloat { 0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-6px) rotate(5deg);} }
+.regalo-items { display:flex; flex-direction:column; gap:10px; }
+.regalo-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:8px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); font-size:13px; color:rgba(255,255,255,.7); transition:all .25s; cursor:none; }
+.regalo-item:hover { background:rgba(255,255,255,.1); color:var(--white); }
+.regalo-item::before { content:'🎁'; font-size:14px; }
+.form-wizard { background:var(--forest); border-radius:20px; overflow:hidden; }
+.form-top { padding:28px 32px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; align-items:center; gap:12px; }
+.form-step-indicators { display:flex; gap:6px; flex:1; }
+.form-step-ind { height:3px; flex:1; border-radius:999px; background:rgba(255,255,255,.12); transition:background .3s; }
+.form-step-ind.done { background:var(--gold); }
+.form-step-ind.active { background:var(--accent); }
+.form-step-count { font-size:12px; color:var(--muted); white-space:nowrap; }
+.form-pages { overflow:hidden; }
+.form-page { display:none; padding:32px; animation:slideIn .4s; }
+.form-page.active { display:block; }
+@keyframes slideIn { from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);} }
+.form-page-title { font-size:20px; font-weight:700; color:var(--white); margin-bottom:6px; }
+.form-page-sub { font-size:13px; color:var(--muted); margin-bottom:24px; }
+.fgrow { display:flex; flex-direction:column; gap:6px; margin-bottom:18px; }
+.fgrow label { font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.45); }
+.fgrow input,.fgrow select,.fgrow textarea { background:rgba(255,255,255,.07); border:1.5px solid rgba(255,255,255,.1); border-radius:8px; padding:12px 14px; font-size:14px; color:var(--white); font-family:'Cabinet Grotesk',sans-serif; outline:none; transition:border-color .2s,background .2s; }
+.fgrow input::placeholder { color:rgba(255,255,255,.3); }
+.fgrow input:focus,.fgrow select:focus { border-color:var(--gold); background:rgba(255,255,255,.1); }
+.fgrow select option { background:var(--forest-2); color:var(--white); }
+.fg2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.opt-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+.opt-btn { padding:14px; border-radius:10px; text-align:center; border:1.5px solid rgba(255,255,255,.12); background:transparent; cursor:none; transition:all .25s; font-family:'Cabinet Grotesk',sans-serif; }
+.opt-btn:hover { border-color:rgba(201,168,76,.5); background:rgba(201,168,76,.08); }
+.opt-btn.selected { border-color:var(--gold); background:rgba(201,168,76,.12); }
+.opt-btn .opt-icon { font-size:24px; display:block; margin-bottom:8px; }
+.opt-btn .opt-label { font-size:12px; font-weight:700; color:var(--white); }
+.opt-btn .opt-sub { font-size:11px; color:var(--muted); margin-top:3px; }
+.form-nav { display:flex; gap:12px; padding:0 32px 32px; justify-content:space-between; align-items:center; }
+.btn-prev { background:transparent; border:1px solid rgba(255,255,255,.15); color:var(--muted); padding:12px 24px; border-radius:999px; font-size:12px; font-weight:700; cursor:none; font-family:'Cabinet Grotesk',sans-serif; transition:all .2s; }
+.btn-next { flex:1; background:var(--gold); color:var(--forest); padding:14px; border-radius:999px; border:none; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; cursor:none; font-family:'Cabinet Grotesk',sans-serif; transition:all .2s; }
+.btn-next:hover { background:#e0be5e; }
+.form-trust { font-size:11px; color:rgba(255,255,255,.3); text-align:center; padding:0 32px 24px; line-height:1.6; }
+.form-success { display:none; padding:48px 32px; text-align:center; }
+.form-success.show { display:block; }
+.success-icon { font-size:56px; margin-bottom:16px; display:block; animation:bounceIn .6s; }
+@keyframes bounceIn { from{transform:scale(0);}60%{transform:scale(1.2);}to{transform:scale(1);} }
+.success-title { font-size:24px; font-weight:700; color:var(--white); margin-bottom:8px; }
+.success-sub { font-size:14px; color:var(--muted); line-height:1.7; }
+
+
+/* ── INFO FLIP ── */
+#info { padding:100px 0; background:var(--forest-2); }
+.info-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:56px; }
+.flip-card { height:260px; perspective:1000px; cursor:none; }
+.flip-inner { width:100%; height:100%; position:relative; transition:transform .7s; transform-style:preserve-3d; }
+.flip-card:hover .flip-inner { transform:rotateY(180deg); }
+.flip-front,.flip-back { position:absolute; inset:0; border-radius:16px; backface-visibility:hidden; -webkit-backface-visibility:hidden; display:flex; flex-direction:column; justify-content:flex-end; padding:24px; }
+.flip-front { background:var(--forest-3); border:1px solid rgba(255,255,255,.08); }
+.flip-back { background:var(--gold); color:var(--forest); transform:rotateY(180deg); justify-content:center; align-items:flex-start; }
+.flip-icon { font-size:32px; margin-bottom:auto; padding-bottom:16px; }
+.flip-title { font-size:17px; font-weight:700; color:var(--white); }
+.flip-hint { font-size:11px; color:var(--muted-2); margin-top:4px; }
+.flip-back-title { font-size:15px; font-weight:900; color:var(--forest); margin-bottom:12px; }
+.flip-back-text { font-size:13px; color:rgba(17,26,16,.75); line-height:1.6; }
+.flip-chips { display:flex; gap:6px; flex-wrap:wrap; margin-top:14px; }
+.flip-chip { padding:3px 10px; border-radius:99px; background:rgba(17,26,16,.12); font-size:10px; font-weight:700; color:var(--forest); }
+
+
+@media(max-width:900px){
+  .act-grid,.info-grid{grid-template-columns:repeat(2,1fr);padding:0 20px;}
+  .act-header{padding:0 20px;}
+  .llegar-layout,.clima-panel.active,.rec-layout{grid-template-columns:1fr;}
+  .llegar-right{min-height:320px;}
+  .eventos-strip{grid-template-columns:1fr;}
+  .inner{padding:0 20px;}
+  h2.serif{font-size:clamp(32px,8vw,48px);}
+  .temp-big{font-size:64px;}
+}
+</style>
+</head>
+<body>
+
+
+<!-- ══ INTRO SPLASH ══ -->
+<div id="intro">
+  <div class="intro-mountains">
+    <svg viewBox="0 0 1440 180" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="0,180 200,60 380,130 580,20 760,100 940,30 1100,90 1280,40 1440,80 1440,180" fill="#0a1809" opacity=".8"/>
+      <polygon points="0,180 150,100 300,150 500,60 700,120 900,50 1100,110 1300,70 1440,100 1440,180" fill="#0e1f0d"/>
+    </svg>
+  </div>
+  <div class="intro-logo-wrap">
+    <div class="intro-badge">Reserva · Sierra Madre · Durango</div>
+    <div class="intro-title-wrap">
+      <div class="intro-title">Alta <span>Norte</span></div>
+    </div>
+    <div class="intro-sub">Ski · Camping · Resort</div>
+    <div class="intro-line"></div>
+    <div class="intro-loading">
+      <div class="intro-dot"></div>
+      <div class="intro-dot"></div>
+      <div class="intro-dot"></div>
+    </div>
+  </div>
+</div>
+
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<div id="progress"></div>
+
+
+<!-- ══ HERO SLIDER ══ -->
+<section class="hero-slider" id="hero-slider">
+  <div class="hs-distance">
+    <div class="hs-dist-num">50 min</div>
+    <div class="hs-dist-label">de Durango</div>
+  </div>
+  <button class="hs-arrow hs-arrow-left" onclick="AN_changeSlide(-1)" aria-label="Anterior">&#8249;</button>
+  <button class="hs-arrow hs-arrow-right" onclick="AN_changeSlide(1)" aria-label="Siguiente">&#8250;</button>
+  <div class="hs-dots">
+    <button class="hs-dot active" onclick="AN_goSlide(0)" aria-label="Slide 1"></button>
+    <button class="hs-dot" onclick="AN_goSlide(1)" aria-label="Slide 2"></button>
+    <button class="hs-dot" onclick="AN_goSlide(2)" aria-label="Slide 3"></button>
+  </div>
+  <div class="hs-progress"><div class="hs-progress-fill" id="hs-fill"></div></div>
+  <div class="hs-scroll"><span>Scroll</span><div class="hs-scroll-line"></div></div>
+
+
+  <!-- SLIDE 1 → IMAGEN 1: background-image: url('/images/tu-foto-1.jpg'); -->
+  <div class="hs-slide active">
+    <div class="hs-slide-bg" style="background-color:#1a3010;/* background-image:url('/images/tu-foto-1.jpg'); */"></div>
+    <div class="hs-overlay"></div>
+    <div class="hs-content">
+      <span class="hs-eyebrow">Reserva Alta Norte · Sierra Madre · Durango</span>
+      <h1 class="hs-title">El mejor lugar en el bosque<br>para vivir <span>lo extraordinario.</span></h1>
+      <p class="hs-subtitle">A solo 50 minutos de Durango. Naturaleza virgen,<br>lujo y aventura en perfecta armonía.</p>
+      <div class="hs-pills">
+        <span class="hs-pill hs-pill-gold">⛷️ Ski &amp; Snowboard</span>
+        <span class="hs-pill hs-pill-white">🏕️ Camping &amp; Glamping</span>
+        <span class="hs-pill hs-pill-gold">50+ lotes disponibles</span>
+      </div>
+      <div class="hs-ctas">
+        <a href="#nosotros" class="hs-btn-primary">Conoce el proyecto →</a>
+        <a href="#planos" class="hs-btn-secondary">Ver lotes</a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 2 → IMAGEN 2: background-image: url('/images/tu-foto-2.jpg'); -->
+  <div class="hs-slide">
+    <div class="hs-slide-bg" style="background-color:#0d2018;/* background-image:url('/images/tu-foto-2.jpg'); */"></div>
+    <div class="hs-overlay"></div>
+    <div class="hs-content">
+      <span class="hs-eyebrow">Lifestyle · Ski · Camping · Resort</span>
+      <h1 class="hs-title">Disfruta las montañas en<br>un entorno de <span>lujo y confort.</span></h1>
+      <p class="hs-subtitle">Tres mundos únicos en un solo lugar. Aventura extrema,<br>naturaleza pura y el resort más exclusivo de la región.</p>
+      <div class="hs-pills">
+        <span class="hs-pill hs-pill-gold">🏔️ 2,400 msnm</span>
+        <span class="hs-pill hs-pill-white">🌲 100% entorno natural</span>
+        <span class="hs-pill hs-pill-gold">Casa Club · Restaurante</span>
+      </div>
+      <div class="hs-ctas">
+        <a href="#amenidades" class="hs-btn-primary">Ver amenidades →</a>
+        <a href="#tour" class="hs-btn-secondary">Tour virtual 360°</a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 3 → IMAGEN 3: background-image: url('/images/tu-foto-3.jpg'); -->
+  <div class="hs-slide">
+    <div class="hs-slide-bg" style="background-color:#08141e;/* background-image:url('/images/tu-foto-3.jpg'); */"></div>
+    <div class="hs-overlay"></div>
+    <div class="hs-content">
+      <span class="hs-eyebrow">Inversión · Plusvalía · Sierra Madre</span>
+      <h1 class="hs-title">Tu lote en la sierra,<br><span>la mejor inversión</span><br>que puedes hacer.</h1>
+      <p class="hs-subtitle">Plusvalía garantizada en el único desarrollo con pista de esquí<br>de la región. Escritura a tu nombre desde el primer día.</p>
+      <div class="hs-pills">
+        <span class="hs-pill hs-pill-gold">📈 Alta plusvalía</span>
+        <span class="hs-pill hs-pill-white">📄 Escritura inmediata</span>
+        <span class="hs-pill hs-pill-gold">Desde $85,000 USD</span>
+      </div>
+      <div class="hs-ctas">
+        <a href="#planos" class="hs-btn-primary">Cotizar mi lote →</a>
+        <a href="#recorrido" class="hs-btn-secondary">Agendar recorrido</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<script>
+(function(){
+  var cur=0,total=3,timer;
+  function goSlide(n){
+    document.querySelectorAll('.hs-slide').forEach(function(s,i){s.classList.toggle('active',i===n);});
+    document.querySelectorAll('.hs-dot').forEach(function(d,i){d.classList.toggle('active',i===n);});
+    cur=n; resetProgress();
+  }
+  function changeSlide(dir){goSlide((cur+dir+total)%total);}
+  function resetProgress(){
+    var f=document.getElementById('hs-fill');
+    if(!f)return;
+    f.style.transition='none'; f.style.width='0%';
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      f.style.transition='width 5s linear'; f.style.width='100%';
+    });});
+    clearInterval(timer);
+    timer=setInterval(function(){changeSlide(1);},5000);
+  }
+  var startX=0,slider=document.getElementById('hero-slider');
+  if(slider){
+    slider.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;},{passive:true});
+    slider.addEventListener('touchend',function(e){var d=startX-e.changedTouches[0].clientX;if(Math.abs(d)>50)changeSlide(d>0?1:-1);},{passive:true});
+    slider.addEventListener('mouseenter',function(){clearInterval(timer);});
+    slider.addEventListener('mouseleave',function(){timer=setInterval(function(){changeSlide(1);},5000);});
+  }
+  window.AN_goSlide=goSlide; window.AN_changeSlide=changeSlide;
+  resetProgress();
+})();
+</script>
+
+
+<!-- ══ ACTIVIDADES ══ -->
+<section id="actividades">
+  <div class="act-header">
+    <div>
+      <div class="tag reveal">Lo que puedes hacer</div>
+      <h2 class="serif dark-serif reveal" data-delay="1">Aventura, naturaleza<br>y <em>descanso total.</em></h2>
+      <p class="lead lead-dark reveal" data-delay="2">16 actividades diseñadas para el disfrute en cada estación del año.</p>
+    </div>
+    <div class="act-filter reveal" data-delay="2">
+      <button class="filter-btn active" data-filter="all">Todas</button>
+      <button class="filter-btn" data-filter="aventura">Aventura</button>
+      <button class="filter-btn" data-filter="naturaleza">Naturaleza</button>
+      <button class="filter-btn" data-filter="relax">Relax</button>
+      <button class="filter-btn" data-filter="invierno">Invierno</button>
+    </div>
+  </div>
+  <div class="act-grid">
+    <div class="act-card reveal" data-cat="invierno aventura"><div class="act-icon-wrap"><span>⛷️</span></div><div class="act-cat">Invierno</div><div class="act-name">Ski &amp; Snowboard</div></div>
+    <div class="act-card reveal" data-delay="1" data-cat="aventura naturaleza"><div class="act-icon-wrap"><span>🏔️</span></div><div class="act-cat">Aventura</div><div class="act-name">Senderismo de montaña</div></div>
+    <div class="act-card reveal" data-delay="2" data-cat="naturaleza relax"><div class="act-icon-wrap"><span>🎣</span></div><div class="act-cat">Naturaleza</div><div class="act-name">Pesca deportiva</div></div>
+    <div class="act-card reveal" data-delay="3" data-cat="aventura"><div class="act-icon-wrap"><span>🚴</span></div><div class="act-cat">Aventura</div><div class="act-name">Ciclismo de montaña</div></div>
+    <div class="act-card reveal" data-cat="naturaleza relax"><div class="act-icon-wrap"><span>🏕️</span></div><div class="act-cat">Naturaleza</div><div class="act-name">Glamping &amp; Camping</div></div>
+    <div class="act-card reveal" data-delay="1" data-cat="naturaleza relax"><div class="act-icon-wrap"><span>🔭</span></div><div class="act-cat">Naturaleza</div><div class="act-name">Observatorio astronómico</div></div>
+    <div class="act-card reveal" data-delay="2" data-cat="naturaleza"><div class="act-icon-wrap"><span>🐦</span></div><div class="act-cat">Naturaleza</div><div class="act-name">Observación de aves</div></div>
+    <div class="act-card reveal" data-delay="3" data-cat="aventura"><div class="act-icon-wrap"><span>🎯</span></div><div class="act-cat">Aventura</div><div class="act-name">Campo de tiro</div></div>
+    <div class="act-card reveal" data-cat="aventura relax"><div class="act-icon-wrap"><span>🏓</span></div><div class="act-cat">Deporte</div><div class="act-name">Canchas deportivas</div></div>
+    <div class="act-card reveal" data-delay="1" data-cat="relax naturaleza"><div class="act-icon-wrap"><span>🔥</span></div><div class="act-cat">Relax</div><div class="act-name">Fogatero nocturno</div></div>
+    <div class="act-card reveal" data-delay="2" data-cat="relax"><div class="act-icon-wrap"><span>🧘</span></div><div class="act-cat">Relax</div><div class="act-name">Yoga en la naturaleza</div></div>
+    <div class="act-card reveal" data-delay="3" data-cat="relax"><div class="act-icon-wrap"><span>🍽️</span></div><div class="act-cat">Relax</div><div class="act-name">Restaurante sierra</div></div>
+    <div class="act-card reveal" data-cat="relax"><div class="act-icon-wrap"><span>🏊</span></div><div class="act-cat">Relax</div><div class="act-name">Alberca panorámica</div></div>
+    <div class="act-card reveal" data-delay="1" data-cat="naturaleza relax"><div class="act-icon-wrap"><span>🌿</span></div><div class="act-cat">Naturaleza</div><div class="act-name">Trail running</div></div>
+    <div class="act-card reveal" data-delay="2" data-cat="invierno aventura"><div class="act-icon-wrap"><span>🎿</span></div><div class="act-cat">Invierno</div><div class="act-name">Clases de esquí</div></div>
+    <div class="act-card reveal" data-delay="3" data-cat="aventura naturaleza"><div class="act-icon-wrap"><span>🎪</span></div><div class="act-cat">Familia</div><div class="act-name">Áreas familiares</div></div>
+  </div>
+</section>
+
+
+<!-- ══ CÓMO LLEGAR ══ -->
+<section id="llegar">
+  <div class="llegar-layout">
+    <div class="llegar-left">
+      <div class="tag reveal">Ubicación</div>
+      <h2 class="serif reveal" data-delay="1">Llegar es<br><em>más fácil</em><br>de lo que crees.</h2>
+      <p class="lead reveal" data-delay="2">Sierra Madre Occidental, Durango. A horas de las principales ciudades — y a un vuelo de EE.UU.</p>
+      <div class="rutas-list reveal" data-delay="3">
+        <div class="ruta active" data-route="durango"><div class="ruta-emoji">🚗</div><div class="ruta-info"><div class="ruta-from">Desde Durango</div><div class="ruta-time">50 min</div><div class="ruta-detail">MEX-40 · Acceso pavimentado</div></div><div class="ruta-chevron">›</div></div>
+        <div class="ruta" data-route="mazatlan"><div class="ruta-emoji">🚗</div><div class="ruta-info"><div class="ruta-from">Desde Mazatlán</div><div class="ruta-time">2:45 hrs</div><div class="ruta-detail">Autopista del Sol · Ruta escénica</div></div><div class="ruta-chevron">›</div></div>
+        <div class="ruta" data-route="usa"><div class="ruta-emoji">✈️</div><div class="ruta-info"><div class="ruta-from">Desde EE.UU.</div><div class="ruta-time">Vuelo + 2 hrs</div><div class="ruta-detail">Houston · Dallas · Phoenix → DGO</div></div><div class="ruta-chevron">›</div></div>
+        <div class="ruta" data-route="mty"><div class="ruta-emoji">🚗</div><div class="ruta-info"><div class="ruta-from">Desde Monterrey</div><div class="ruta-time">5 hrs</div><div class="ruta-detail">Carretera federal</div></div><div class="ruta-chevron">›</div></div>
+      </div>
+      <div class="pasos-accordion reveal" data-delay="4">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted-2);margin-bottom:14px">Paso a paso</div>
+        <div class="paso-item open"><button class="paso-trigger"><div class="paso-num-badge">1</div><div class="paso-trigger-text">Sal de Durango rumbo al sur</div><div class="paso-trigger-icon">+</div></button><div class="paso-body"><p>Toma MEX-40. Son solo <strong>50 minutos</strong> con acceso pavimentado todo el camino.</p></div></div>
+        <div class="paso-item"><button class="paso-trigger"><div class="paso-num-badge">2</div><div class="paso-trigger-text">Toma la desviación señalizada</div><div class="paso-trigger-icon">+</div></button><div class="paso-body"><p>Señalética de <strong>Reserva Alta Norte</strong> visible desde la carretera a la derecha.</p></div></div>
+        <div class="paso-item"><button class="paso-trigger"><div class="paso-num-badge">3</div><div class="paso-trigger-text">Llega a la caseta principal</div><div class="paso-trigger-icon">+</div></button><div class="paso-body"><p>8 km más. <strong>Avísanos antes de salir</strong> por WhatsApp para que el guardia te espere.</p></div></div>
+      </div>
+    </div>
+    <div class="llegar-right reveal-r">
+      <div class="map-svg-wrap">
+        <svg viewBox="0 0 400 500" width="100%" height="100%" style="max-height:500px">
+          <defs><radialGradient id="glow1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#4a8f3f" stop-opacity=".15"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs>
+          <rect width="400" height="500" fill="#172e15"/>
+          <ellipse cx="200" cy="250" rx="160" ry="160" fill="url(#glow1)"/>
+          <polygon points="0,350 80,220 160,300 240,180 320,260 400,200 400,500 0,500" fill="#1f3d1c" opacity=".8"/>
+          <polygon points="0,380 60,270 130,330 200,220 280,290 360,240 400,270 400,500 0,500" fill="#152a13" opacity=".9"/>
+          <path d="M200,460 C200,420 180,380 160,340 C140,300 130,260 150,220 C170,180 190,160 200,120" fill="none" stroke="#c9a84c" stroke-width="2" stroke-dasharray="8 4" class="route-line" opacity=".6"/>
+          <g><circle cx="200" cy="460" r="8" fill="#c9a84c" opacity=".9"/><circle cx="200" cy="460" r="14" fill="#c9a84c" opacity=".15" class="pin-pulse"/><text x="216" y="464" fill="#c9a84c" font-size="10" font-family="sans-serif" font-weight="700">DURANGO</text></g>
+          <g><circle cx="50" cy="300" r="6" fill="rgba(255,255,255,.6)"/><text x="62" y="304" fill="rgba(255,255,255,.6)" font-size="9" font-family="sans-serif">MAZATLÁN</text></g>
+          <g><circle cx="360" cy="180" r="6" fill="rgba(255,255,255,.5)"/><text x="310" y="168" fill="rgba(255,255,255,.5)" font-size="9" font-family="sans-serif">MONTERREY</text></g>
+          <g><circle cx="200" cy="120" r="12" fill="#4a8f3f"/><circle cx="200" cy="120" r="20" fill="#4a8f3f" opacity=".2" class="pin-pulse"/><text x="200" y="93" fill="white" font-size="10" font-family="sans-serif" font-weight="700" text-anchor="middle">ALTA NORTE</text><text x="200" y="105" fill="rgba(255,255,255,.6)" font-size="8" font-family="sans-serif" text-anchor="middle">2,400 msnm</text></g>
+          <text x="200" y="30" fill="rgba(255,255,255,.3)" font-size="9" font-family="sans-serif" text-anchor="middle">✈ Houston · Dallas · Phoenix → DGO</text>
+        </svg>
+      </div>
+      <div style="padding:0 24px 24px;display:flex;gap:12px;flex-wrap:wrap;">
+        <a class="btn btn-gold" href="https://maps.google.com" target="_blank" style="flex:1;justify-content:center">Google Maps <span class="btn-arrow">→</span></a>
+        <button class="btn btn-ghost" onclick="document.getElementById('recorrido').scrollIntoView({behavior:'smooth'})" style="flex:1;justify-content:center">Agendar visita</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ CLIMA ══ -->
+<section id="clima" style="padding:100px 0;">
+  <div class="inner">
+    <div class="tag reveal">Antes de venir</div>
+    <h2 class="serif dark-serif reveal" data-delay="1">Clima y lo que<br>debes <em>traer.</em></h2>
+    <div class="clima-tabs reveal" data-delay="2">
+      <button class="clima-tab active" data-season="primavera">🌸 Primavera</button>
+      <button class="clima-tab" data-season="verano">🌿 Verano</button>
+      <button class="clima-tab" data-season="otono">🍂 Otoño</button>
+      <button class="clima-tab" data-season="invierno">❄️ Invierno</button>
+    </div>
+    <div class="clima-panel active" id="panel-primavera">
+      <div><div class="temp-big">16°C</div><div class="temp-range">5°C — 20°C · Mar – May</div><p class="clima-desc">Días templados perfectos para senderismo. El bosque en su momento más verde.</p><div class="clima-tags"><span class="clima-tag">🌸 Floración</span><span class="clima-tag">🚴 Ciclismo</span><span class="clima-tag">☀️ Soleado</span></div></div>
+      <div class="vest-grid"><div class="vest-card"><div class="vest-e">🧥</div><div><div class="vest-t">Chamarra ligera</div><div class="vest-d">Noches a 5°C. Impermeable ligera recomendada.</div></div></div><div class="vest-card"><div class="vest-e">🧴</div><div><div class="vest-t">Protector SPF 50+</div><div class="vest-d">A 2,400 msnm la radiación es muy intensa.</div></div></div></div>
+    </div>
+    <div class="clima-panel" id="panel-verano">
+      <div><div class="temp-big">18°C</div><div class="temp-range">8°C — 22°C · Jun – Ago</div><p class="clima-desc">Lluvias vespertinas. El verde de la sierra en su máximo esplendor.</p><div class="clima-tags"><span class="clima-tag">🌧️ Lluvias</span><span class="clima-tag">🌿 Verde máximo</span><span class="clima-tag">🌈 Atardeceres</span></div></div>
+      <div class="vest-grid"><div class="vest-card"><div class="vest-e">☂️</div><div><div class="vest-t">Impermeable o poncho</div><div class="vest-d">Lluvias cortas pero intensas por las tardes.</div></div></div><div class="vest-card"><div class="vest-e">👟</div><div><div class="vest-t">Botas impermeables</div><div class="vest-d">Los senderos se mojan rápido.</div></div></div></div>
+    </div>
+    <div class="clima-panel" id="panel-otono">
+      <div><div class="temp-big">12°C</div><div class="temp-range">2°C — 18°C · Sep – Nov</div><p class="clima-desc">Colores espectaculares en el bosque. Noches con cielos estrellados únicos.</p><div class="clima-tags"><span class="clima-tag">🍂 Colores</span><span class="clima-tag">⭐ Estrellas</span><span class="clima-tag">🔥 Fogatas</span></div></div>
+      <div class="vest-grid"><div class="vest-card"><div class="vest-e">🧣</div><div><div class="vest-t">Capas de abrigo</div><div class="vest-d">Térmica base + suéter + chamarra exterior.</div></div></div><div class="vest-card"><div class="vest-e">📷</div><div><div class="vest-t">Cámara fotográfica</div><div class="vest-d">La mejor temporada para fotografía en la sierra.</div></div></div></div>
+    </div>
+    <div class="clima-panel" id="panel-invierno">
+      <div><div class="temp-big">-2°C</div><div class="temp-range">-8°C — 10°C · Dic – Feb</div><p class="clima-desc">Temporada de ski. La única pista de la región se activa con nieve real.</p><div class="clima-tags"><span class="clima-tag">❄️ Nieve</span><span class="clima-tag">⛷️ Pistas activas</span><span class="clima-tag">🏔️ Vista nevada</span></div></div>
+      <div class="vest-grid"><div class="vest-card"><div class="vest-e">🧥</div><div><div class="vest-t">Ropa térmica completa</div><div class="vest-d">Camiseta, pantalón y calcetines térmicos.</div></div></div><div class="vest-card"><div class="vest-e">🎿</div><div><div class="vest-t">Equipo de ski</div><div class="vest-d">Trae el tuyo o renta en las instalaciones.</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ EVENTOS ══ -->
+<section id="eventos">
+  <div class="inner" style="padding-top:100px;padding-bottom:56px;">
+    <div class="tag reveal">Eventos sociales</div>
+    <h2 class="serif reveal" data-delay="1">El escenario perfecto<br>para lo que <em>importa.</em></h2>
+    <p class="lead reveal" data-delay="2">La Casa Club y el entorno natural de Reserva Alta Norte son el marco único para los eventos más especiales.</p>
+  </div>
+  <div class="eventos-strip">
+    <div class="ev-card reveal-l"><div class="ev-bg">💍</div><div class="ev-content"><div class="ev-tag">Bodas</div><h3 class="ev-title">Bodas y celebraciones privadas</h3><p class="ev-desc">El bosque como fondo de tu boda. Sin salones genéricos.</p><ul class="ev-features"><li>Cualquier capacidad</li><li>Coordinación completa</li><li>Gastronomía de montaña</li><li>Alojamiento incluido</li></ul><button class="ev-cta" onclick="document.getElementById('recorrido').scrollIntoView({behavior:'smooth'})">Consultar disponibilidad</button></div><div class="ev-line"></div></div>
+    <div class="ev-card reveal" data-delay="1"><div class="ev-bg">🎂</div><div class="ev-content"><div class="ev-tag">Social</div><h3 class="ev-title">XV años y reuniones familiares</h3><p class="ev-desc">La sierra y las estrellas como decoración incomparable.</p><ul class="ev-features"><li>Palapas y espacios techados</li><li>Área de fogata privada</li><li>Actividades para todas las edades</li><li>Seguridad privada</li></ul><button class="ev-cta" onclick="document.getElementById('recorrido').scrollIntoView({behavior:'smooth'})">Solicitar información</button></div><div class="ev-line"></div></div>
+    <div class="ev-card reveal-r"><div class="ev-bg">👔</div><div class="ev-content"><div class="ev-tag">Empresarial</div><h3 class="ev-title">Retiros y team building</h3><p class="ev-desc">Sin distracciones urbanas. Máxima creatividad.</p><ul class="ev-features"><li>Sala de reuniones equipada</li><li>Team building a la medida</li><li>Hospedaje para el equipo</li><li>Cero distracciones</li></ul><button class="ev-cta" onclick="document.getElementById('recorrido').scrollIntoView({behavior:'smooth'})">Planear mi retiro</button></div><div class="ev-line"></div></div>
+  </div>
+  <div class="inner" style="padding-bottom:100px;padding-top:32px;">
+    <div style="background:var(--forest-3);border-radius:16px;padding:36px 40px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;border:1px solid rgba(255,255,255,.08)">
+      <div style="flex:1;min-width:260px"><div style="font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Empresas y universidades</div><h3 style="font-size:20px;font-weight:700;color:var(--white);margin-bottom:8px">¿Buscas el escenario ideal para tu reunión de alto nivel?</h3><p style="font-size:14px;color:var(--muted);line-height:1.6">La Sierra Madre como fondo de tus decisiones más importantes.</p></div>
+      <button class="btn btn-gold" onclick="document.getElementById('recorrido').scrollIntoView({behavior:'smooth'})">Hablar con un asesor <span class="btn-arrow">→</span></button>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ RECORRIDO ══ -->
+<section id="recorrido">
+  <div class="inner">
+    <div class="rec-layout">
+      <div>
+        <div class="tag reveal">Sin costo · Sin compromiso</div>
+        <h2 class="serif dark-serif reveal" data-delay="1">Agenda tu recorrido<br>y llévate un<br><em>regalo sorpresa.</em></h2>
+        <p class="lead lead-dark reveal" data-delay="2">Visita Reserva Alta Norte sin costo. Comida incluida + regalo sorpresa al finalizar.</p>
+        <div class="timeline-wrap" style="margin-top:40px">
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot">1</div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-title">Bienvenida en caseta principal</div><div class="tl-desc">Tu asesor te recibe y entrega kit de bienvenida.</div><div class="tl-time">~15 min</div></div></div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot">2</div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-title">Tour de lotes en 4×4</div><div class="tl-desc">Recorre los lotes disponibles con sus vistas.</div><div class="tl-time">~45 min</div></div></div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot">3</div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-title">Recorrido de amenidades</div><div class="tl-desc">Ski resort, lago, Casa Club, senderos y observatorio.</div><div class="tl-time">~30 min</div></div></div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot">4</div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-title">Comida en Casa Club</div><div class="tl-desc">Almuerzo incluido para ti y tu acompañante.</div><div class="tl-time">~60 min · Gratis</div></div></div>
+          <div class="tl-item"><div class="tl-left"><div class="tl-dot" style="font-size:18px">🎁</div></div><div class="tl-body"><div class="tl-title">Tu regalo sorpresa</div><div class="tl-desc">Algo especial de la Sierra Madre. Vale el viaje.</div><div class="tl-time">Al concluir</div></div></div>
+        </div>
+        <div class="regalo-reveal" style="margin-top:32px">
+          <div class="regalo-header"><span class="gift-spin">🎁</span><h3>¿Qué es el regalo sorpresa?</h3></div>
+          <div class="regalo-items">
+            <div class="regalo-item">Productos artesanales de la Sierra Madre</div>
+            <div class="regalo-item">Una experiencia gastronómica exclusiva</div>
+            <div class="regalo-item">Un recuerdo que no encontrarás en otro lugar</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="form-wizard reveal-r" data-delay="2">
+          <div class="form-top"><div class="form-step-indicators"><div class="form-step-ind active" id="ind-1"></div><div class="form-step-ind" id="ind-2"></div><div class="form-step-ind" id="ind-3"></div></div><span class="form-step-count" id="step-count">Paso 1 de 3</span></div>
+          <div class="form-pages" id="form-pages">
+            <div class="form-page active" id="page-1"><div class="form-page-title">¿Para qué te interesa?</div><p class="form-page-sub">Cuéntanos qué te trajo aquí.</p><div class="opt-grid"><button class="opt-btn" onclick="selectOpt(this)"><span class="opt-icon">🏡</span><div class="opt-label">Comprar un lote</div><div class="opt-sub">Para construir</div></button><button class="opt-btn" onclick="selectOpt(this)"><span class="opt-icon">🏖️</span><div class="opt-label">Casa de descanso</div><div class="opt-sub">Fin de semana</div></button><button class="opt-btn" onclick="selectOpt(this)"><span class="opt-icon">📈</span><div class="opt-label">Inversión</div><div class="opt-sub">Plusvalía</div></button><button class="opt-btn" onclick="selectOpt(this)"><span class="opt-icon">👀</span><div class="opt-label">Solo conocer</div><div class="opt-sub">Sin compromiso</div></button></div></div>
+            <div class="form-page" id="page-2"><div class="form-page-title">Tus datos de contacto</div><p class="form-page-sub">Tu asesor confirma en menos de 24 hrs.</p><div class="fg2"><div class="fgrow"><label>Nombre</label><input type="text" placeholder="Tu nombre"></div><div class="fgrow"><label>Apellido</label><input type="text" placeholder="Tu apellido"></div></div><div class="fgrow"><label>WhatsApp</label><input type="tel" placeholder="+52 (618) 000-0000"></div><div class="fgrow"><label>Ciudad actual</label><input type="text" placeholder="Ej: Houston TX / Monterrey NL"></div></div>
+            <div class="form-page" id="page-3"><div class="form-page-title">Elige fecha y grupo</div><p class="form-page-sub">¿Cuándo y cuántos van?</p><div class="fg2"><div class="fgrow"><label>Fecha preferida</label><input type="date"></div><div class="fgrow"><label>¿Cuántos van?</label><select><option>Solo yo</option><option>Yo + 1 acompañante</option><option>Familia (3–4)</option><option>Grupo (5+)</option></select></div></div><div style="background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:8px;padding:14px;margin-top:4px"><p style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.6">🎁 <strong style="color:var(--gold)">Recuerda:</strong> Regalo sorpresa + comida incluida al finalizar.</p></div></div>
+          </div>
+          <div class="form-success" id="form-success"><span class="success-icon">🌲</span><div class="success-title">¡Recorrido agendado!</div><p class="success-sub">Tu asesor te contacta en menos de 24 hrs. ¡Te espera tu regalo sorpresa!</p></div>
+          <div class="form-nav" id="form-nav"><button class="btn-prev" id="btn-prev" onclick="prevStep()" style="display:none">← Atrás</button><button class="btn-next" id="btn-next" onclick="nextStep()">Siguiente →</button></div>
+          <p class="form-trust">Sin spam · Sin compromiso · Respuesta en -24 hrs</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══ INFO FLIP ══ -->
+<section id="info">
+  <div class="inner">
+    <div class="tag reveal">Info práctica</div>
+    <h2 class="serif reveal" data-delay="1">Lo que necesitas saber<br><em>antes de llegar.</em></h2>
+    <p class="lead reveal" data-delay="2">Pasa el cursor sobre cada tarjeta.</p>
+    <div class="info-grid">
+      <div class="flip-card reveal" data-delay="1"><div class="flip-inner"><div class="flip-front"><div class="flip-icon">📡</div><div class="flip-title">Conectividad</div><div class="flip-hint">Hover →</div></div><div class="flip-back"><div class="flip-back-title">Sin señal, con WiFi</div><p class="flip-back-text">WiFi de alta velocidad en todas las áreas. WhatsApp y videollamadas sin problema.</p><div class="flip-chips"><span class="flip-chip">WiFi ✓</span><span class="flip-chip">Sin 4G</span></div></div></div></div>
+      <div class="flip-card reveal" data-delay="2"><div class="flip-inner"><div class="flip-front"><div class="flip-icon">💳</div><div class="flip-title">Pagos</div><div class="flip-hint">Hover →</div></div><div class="flip-back"><div class="flip-back-title">Efectivo + tarjeta</div><p class="flip-back-text">Visa, Mastercard, Amex. USD y MXN en efectivo. Transferencia para lotes.</p><div class="flip-chips"><span class="flip-chip">Visa ✓</span><span class="flip-chip">USD/MXN</span></div></div></div></div>
+      <div class="flip-card reveal" data-delay="3"><div class="flip-inner"><div class="flip-front"><div class="flip-icon">🌡️</div><div class="flip-title">Altitud</div><div class="flip-hint">Hover →</div></div><div class="flip-back"><div class="flip-back-title">2,400 msnm</div><p class="flip-back-text">Posible mareo el 1er día. Hidratarse bien y descansar las primeras horas.</p><div class="flip-chips"><span class="flip-chip">Hidrátate</span><span class="flip-chip">Descanso</span></div></div></div></div>
+      <div class="flip-card reveal" data-delay="4"><div class="flip-inner"><div class="flip-front"><div class="flip-icon">🏥</div><div class="flip-title">Emergencias</div><div class="flip-hint">Hover →</div></div><div class="flip-back"><div class="flip-back-title">24/7</div><p class="flip-back-text">Primeros auxilios en sitio. Hospital a 30 min. Durango a 50 min.</p><div class="flip-chips"><span class="flip-chip">30 min hosp.</span><span class="flip-chip">24/7</span></div></div></div></div>
+    </div>
+  </div>
+</section>
+
+
+<script>
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px';});
+(function loop(){rx+=(mx-rx)*.14;ry+=(my-ry)*.14;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(loop);})();
+document.querySelectorAll('button,a,.act-card,.ruta,.ev-card,.flip-card,.vest-card,.opt-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-grow'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-grow'));
+});
+const prog=document.getElementById('progress');
+window.addEventListener('scroll',()=>{const p=(window.scrollY/(document.body.scrollHeight-window.innerHeight))*100;prog.style.width=p+'%';});
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});},{threshold:.08});
+document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>obs.observe(el));
+const tlObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');});},{threshold:.15});
+document.querySelectorAll('.tl-item').forEach((el,i)=>{el.style.transitionDelay=i*.1+'s';tlObs.observe(el);});
+document.querySelectorAll('.filter-btn').forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');const f=btn.dataset.filter;document.querySelectorAll('.act-card').forEach(card=>{card.classList.toggle('hidden',f!=='all'&&!card.dataset.cat.includes(f));});});});
+document.querySelectorAll('.ruta').forEach(r=>{r.addEventListener('click',()=>{document.querySelectorAll('.ruta').forEach(x=>x.classList.remove('active'));r.classList.add('active');const rl=document.querySelector('.route-line');if(rl){rl.classList.remove('draw');requestAnimationFrame(()=>rl.classList.add('draw'));}});});
+setTimeout(()=>{const rl=document.querySelector('.route-line');if(rl)rl.classList.add('draw');},800);
+document.querySelectorAll('.paso-trigger').forEach(t=>{t.addEventListener('click',()=>{const item=t.closest('.paso-item');const wasOpen=item.classList.contains('open');document.querySelectorAll('.paso-item').forEach(i=>i.classList.remove('open'));if(!wasOpen)item.classList.add('open');});});
+document.querySelectorAll('.clima-tab').forEach(tab=>{tab.addEventListener('click',()=>{document.querySelectorAll('.clima-tab').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.clima-panel').forEach(p=>p.classList.remove('active'));tab.classList.add('active');document.getElementById('panel-'+tab.dataset.season).classList.add('active');});});
+function selectOpt(el){el.closest('.opt-grid').querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+window.addEventListener('load',()=>{setTimeout(()=>{const intro=document.getElementById('intro');if(intro){intro.classList.add('done');setTimeout(()=>{intro.style.display='none';document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach(el=>{if(el.getBoundingClientRect().top<window.innerHeight)el.classList.add('in');});},900);}},2400);});
+let currentStep=1;const totalSteps=3;
+function updateForm(){document.querySelectorAll('.form-page').forEach((p,i)=>p.classList.toggle('active',i+1===currentStep));document.getElementById('step-count').textContent='Paso '+currentStep+' de '+totalSteps;document.getElementById('btn-prev').style.display=currentStep>1?'block':'none';document.getElementById('btn-next').textContent=currentStep===totalSteps?'Confirmar recorrido →':'Siguiente →';[1,2,3].forEach(i=>{const ind=document.getElementById('ind-'+i);ind.classList.toggle('done',i<currentStep);ind.classList.toggle('active',i===currentStep);});}
+function nextStep(){if(currentStep<totalSteps){currentStep++;updateForm();}else{submitForm();}}
+function prevStep(){if(currentStep>1){currentStep--;updateForm();}}
+function submitForm(){document.getElementById('form-pages').style.display='none';document.getElementById('form-nav').style.display='none';document.querySelector('.form-trust').style.display='none';document.getElementById('form-success').classList.add('show');document.querySelector('.form-top').style.display='none';}
+</script>
+</body>
+</html>`;
+
+
+export default function AltaNorteViewer() {
+  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState("preview");
+
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(HTML_CODE);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+
+  return (
+    <div style={{ display: "flex", gap: 0, height: "100vh", fontFamily: "system-ui, sans-serif", background: "#0e1f0d" }}>
+      
+      {/* LEFT: CODE */}
+      <div style={{ width: "42%", display: "flex", flexDirection: "column", borderRight: "1px solid rgba(201,168,76,.2)" }}>
+        
+        {/* Header */}
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(201,168,76,.15)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "#0a1608" }}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>altanorte_COMPLETO.html</div>
+            <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)", marginTop: 2 }}>81 KB · listo para Lovable</div>
+          </div>
+          <button
+            onClick={handleCopy}
+            style={{ background: copied ? "#4a8f3f" : "#c9a84c", color: "#0e1f0d", border: "none", borderRadius: 99, padding: "8px 18px", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, transition: "background .2s" }}
+          >
+            {copied ? "✓ Copiado" : "Copiar código"}
+          </button>
+        </div>
+
+
+        {/* Instructions */}
+        <div style={{ padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,.06)", background: "#0e1f0d" }}>
+          <div style={{ fontSize: 11, color: "#c9a84c", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>Cómo usarlo en Lovable</div>
+          {[
+            ["1", 'Copia el código con el botón de arriba'],
+            ["2", 'En Lovable, escribe: "Integra este hero slider antes de la sección Nosotros" y pega el código'],
+            ["3", 'Busca → IMAGEN 1/2/3 y agrega tus fotos reales de la sierra'],
+          ].map(([num, text]) => (
+            <div key={num} style={{ display: "flex", gap: 10, marginBottom: 6, alignItems: "flex-start" }}>
+              <div style={{ width: 20, height: 20, borderRadius: "50%", background: "rgba(201,168,76,.15)", border: "1px solid rgba(201,168,76,.3)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, color: "#c9a84c", flexShrink: 0, marginTop: 1 }}>{num}</div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,.6)", lineHeight: 1.5 }}>{text}</div>
+            </div>
+          ))}
+        </div>
+
+
+        {/* Code */}
+        <div style={{ flex: 1, overflow: "auto", background: "#060e06" }}>
+          <pre style={{ margin: 0, padding: "16px 20px", fontSize: 10.5, color: "rgba(255,255,255,.6)", lineHeight: 1.6, fontFamily: "monospace", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+            {HTML_CODE}
+          </pre>
+        </div>
+      </div>
+
+
+      {/* RIGHT: PREVIEW */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(201,168,76,.15)", display: "flex", alignItems: "center", gap: 12, background: "#0a1608" }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#e24b4a" }}></div>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#EF9F27" }}></div>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#4a8f3f" }}></div>
+          <div style={{ flex: 1, background: "rgba(255,255,255,.06)", borderRadius: 6, padding: "5px 14px", fontSize: 11, color: "rgba(255,255,255,.4)", textAlign: "center" }}>
+            altanorte.mx — Vista previa en vivo
+          </div>
+          <div style={{ fontSize: 10, color: "rgba(255,255,255,.3)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Preview</div>
+        </div>
+        <iframe
+          srcDoc={HTML_CODE}
+          style={{ flex: 1, border: "none", width: "100%", background: "#0e1f0d" }}
+          title="Alta Norte Preview"
+        />
+      </div>
+    </div>
+  );
+}
