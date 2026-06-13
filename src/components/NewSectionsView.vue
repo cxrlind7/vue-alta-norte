@@ -247,22 +247,7 @@
           </div>
         </div>
 
-        <div class="an-inner" style="padding-top:32px; padding-bottom:100px;">
-          <div class="an-eventos-banner an-reveal">
-            <div style="flex:1; min-width:260px;">
-              <p class="an-tag-light" style="margin-bottom:8px;">Empresas y universidades</p>
-              <h3 class="an-eventos-banner-title">
-                ¿Buscas el escenario ideal para tu reunión de alto nivel?
-              </h3>
-              <p class="an-eventos-banner-sub">
-                La Sierra Madre como fondo de tus decisiones más importantes.
-              </p>
-            </div>
-            <button class="an-btn-gold" @click="scrollTo('#recorrido-nuevo')">
-              Hablar con un asesor →
-            </button>
-          </div>
-        </div>
+
 
       </div>
     </section>
