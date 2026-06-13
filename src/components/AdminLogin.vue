@@ -14,21 +14,31 @@
 
       <form @submit.prevent="submit" class="space-y-4">
         <div>
+          <label class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Correo</label>
+          <input
+            v-model="email"
+            type="email"
+            autofocus
+            class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-slate-900"
+            placeholder="admin@correo.com"
+          />
+        </div>
+        <div>
           <label class="text-xs font-bold text-gray-500 uppercase tracking-widest block mb-1">Contraseña</label>
           <input
             v-model="password"
             type="password"
-            autofocus
             class="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-slate-900"
             placeholder="••••••••"
           />
-          <p v-if="error" class="text-red-500 text-xs mt-1.5 font-medium">Contraseña incorrecta</p>
         </div>
+        <p v-if="error" class="text-red-500 text-xs font-medium">{{ error }}</p>
         <button
           type="submit"
-          class="w-full py-2.5 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl transition-all text-sm"
+          :disabled="loading"
+          class="w-full py-2.5 bg-slate-900 hover:bg-slate-700 text-white font-bold rounded-xl transition-all text-sm disabled:opacity-50"
         >
-          Ingresar
+          {{ loading ? 'Ingresando...' : 'Ingresar' }}
         </button>
       </form>
     </div>
@@ -42,16 +52,21 @@ import { useAdminState } from '../composables/useAdminState'
 const emit = defineEmits(['success'])
 const { login } = useAdminState()
 
+const email    = ref('')
 const password = ref('')
-const error    = ref(false)
+const error    = ref('')
+const loading  = ref(false)
 
-function submit() {
-  error.value = false
-  if (login(password.value)) {
-    window.location.reload()
-  } else {
-    error.value = true
+async function submit() {
+  error.value   = ''
+  loading.value = true
+  const err = await login(email.value, password.value)
+  loading.value = false
+  if (err) {
+    error.value   = 'Credenciales incorrectas'
     password.value = ''
+  } else {
+    emit('success')
   }
 }
 </script>

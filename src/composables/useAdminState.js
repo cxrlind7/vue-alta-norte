@@ -1,20 +1,27 @@
 import { ref } from 'vue'
+import { supabase } from '../lib/supabase'
 
-const isAdmin = ref(sessionStorage.getItem('an_admin') === '1')
+const isAdmin = ref(false)
+
+if (supabase) {
+  supabase.auth.getSession().then(({ data }) => {
+    isAdmin.value = !!data.session
+  })
+  supabase.auth.onAuthStateChange((_event, session) => {
+    isAdmin.value = !!session
+  })
+}
 
 export function useAdminState() {
-  function login(password) {
-    if (password === import.meta.env.VITE_ADMIN_PASSWORD) {
-      isAdmin.value = true
-      sessionStorage.setItem('an_admin', '1')
-      return true
-    }
-    return false
+  async function login(email, password) {
+    if (!supabase) return 'Supabase no configurado'
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    return error ? error.message : null
   }
 
-  function logout() {
+  async function logout() {
+    if (supabase) await supabase.auth.signOut()
     isAdmin.value = false
-    sessionStorage.removeItem('an_admin')
   }
 
   return { isAdmin, login, logout }

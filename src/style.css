@@ -78,6 +78,97 @@
   font-display: swap;
 }
 
+/* ---- AN Design System Tokens (shared across new section components) ---- */
+:root {
+  --p:   #153f35;
+  --p2:  #0e1a15;
+  --p3:  #1a2e28;
+  --acc: #aebc82;
+  --acc2:#c4cba0;
+  --cr:  #f0ede6;
+  --mu:  rgba(255,255,255,.56);
+  --mu2: rgba(255,255,255,.26);
+  --f:   'Amble', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* Section shells */
+.an-section { position: relative; overflow: hidden; }
+.an-cream   { background: var(--cr); }
+.an-dark    { background: var(--p2); }
+
+/* Background texture layer — always behind .an-z */
+.an-texture {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+/* Content wrapper above texture */
+.an-z { position: relative; z-index: 1; }
+
+/* Scroll-reveal */
+.an-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .75s cubic-bezier(.25,.46,.45,.94),
+              transform .75s cubic-bezier(.25,.46,.45,.94);
+}
+.an-reveal.an-in { opacity: 1; transform: translateY(0); }
+
+/* Max-width inner wrapper */
+.an-inner { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+
+/* Typography */
+.an-tag-dark {
+  font-family: var(--f); font-size: 10px; font-weight: 700;
+  letter-spacing: .28em; text-transform: uppercase;
+  color: var(--p); margin-bottom: 14px; display: block;
+}
+.an-tag-light {
+  font-family: var(--f); font-size: 10px; font-weight: 700;
+  letter-spacing: .28em; text-transform: uppercase;
+  color: var(--acc); margin-bottom: 14px; display: block;
+}
+.an-heading-dark {
+  font-family: var(--f); font-size: clamp(36px,5vw,60px); font-weight: 700;
+  color: var(--p); line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 16px;
+}
+.an-heading-dark em { color: var(--acc); font-style: italic; }
+.an-heading-light {
+  font-family: var(--f); font-size: clamp(36px,5vw,60px); font-weight: 700;
+  color: #fff; line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 16px;
+}
+.an-heading-light em { color: var(--acc); font-style: italic; }
+.an-lead-dark  { font-family: var(--f); font-size: 16px; color: rgba(21,63,53,.65); line-height: 1.75; max-width: 520px; }
+.an-lead-light { font-family: var(--f); font-size: 16px; color: var(--mu); line-height: 1.75; max-width: 520px; }
+
+/* Buttons */
+.an-btn-gold {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 999px;
+  background: var(--acc); color: var(--p);
+  font-family: var(--f); font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  border: none; text-decoration: none; cursor: pointer;
+  transition: background .25s, transform .25s;
+}
+.an-btn-gold:hover { background: var(--acc2); transform: translateY(-2px); color: var(--p); }
+.an-btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 999px;
+  background: transparent; color: #fff;
+  font-family: var(--f); font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  border: 1.5px solid rgba(255,255,255,.28); cursor: pointer;
+  transition: border-color .25s, color .25s;
+}
+.an-btn-ghost:hover { border-color: var(--acc); color: var(--acc); }
+
+@media (max-width: 1024px) {
+  .an-inner { padding-left: 24px; padding-right: 24px; }
+}
+
 /* ---- Base Styles ---- */
 html {
   scroll-behavior: smooth;
@@ -576,4 +667,92 @@ textarea:focus {
 
 .tour-canvas-container:active {
   cursor: grabbing;
+}
+
+/* ---- Natural Texture Overlays ---- */
+.texture-grain {
+  background-image:
+    repeating-linear-gradient(-47deg, transparent, transparent 3px, rgba(100,75,40,0.022) 3px, rgba(100,75,40,0.022) 4px),
+    repeating-linear-gradient(43deg, transparent, transparent 6px, rgba(100,75,40,0.012) 6px, rgba(100,75,40,0.012) 7px) !important;
+}
+
+/* ══ Alta Norte — Sections shared base ══════════════════════════════ */
+:root {
+  --p:    #153f35;
+  --p2:   #0e1a15;
+  --p3:   #1a2e28;
+  --acc:  #aebc82;
+  --acc2: #c4cba0;
+  --cr:   #f0ede6;
+  --mu:   rgba(255,255,255,.56);
+  --mu2:  rgba(255,255,255,.26);
+  --f:    'Amble', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.an-section { position: relative; overflow: hidden; }
+.an-cream   { background: var(--cr); }
+.an-dark    { background: var(--p2); }
+
+.an-texture {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  opacity: 0.08; pointer-events: none;
+}
+.an-z { position: relative; z-index: 1; }
+
+.an-reveal {
+  opacity: 0; transform: translateY(28px);
+  transition: opacity .75s cubic-bezier(.25,.46,.45,.94),
+              transform .75s cubic-bezier(.25,.46,.45,.94);
+}
+.an-reveal.an-in { opacity: 1; transform: translateY(0); }
+
+.an-tag-dark {
+  font-family: var(--f); font-size: 10px; font-weight: 700;
+  letter-spacing: .28em; text-transform: uppercase;
+  color: var(--p); margin-bottom: 14px; display: block;
+}
+.an-tag-light {
+  font-family: var(--f); font-size: 10px; font-weight: 700;
+  letter-spacing: .28em; text-transform: uppercase;
+  color: var(--acc); margin-bottom: 14px; display: block;
+}
+.an-heading-dark {
+  font-family: var(--f); font-size: clamp(36px,5vw,60px); font-weight: 700;
+  color: var(--p); line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 16px;
+}
+.an-heading-dark em { color: var(--acc); font-style: italic; }
+.an-heading-light {
+  font-family: var(--f); font-size: clamp(36px,5vw,60px); font-weight: 700;
+  color: #fff; line-height: 1.08; letter-spacing: -0.025em; margin-bottom: 16px;
+}
+.an-heading-light em { color: var(--acc); font-style: italic; }
+.an-lead-dark  { font-family: var(--f); font-size: 16px; color: rgba(21,63,53,.65); line-height: 1.75; max-width: 520px; }
+.an-lead-light { font-family: var(--f); font-size: 16px; color: var(--mu); line-height: 1.75; max-width: 520px; }
+
+.an-inner { max-width: 1200px; margin: 0 auto; padding: 0 48px; }
+
+.an-btn-gold {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 999px;
+  background: var(--acc); color: var(--p);
+  font-family: var(--f); font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  border: none; text-decoration: none; cursor: pointer;
+  transition: background .25s, transform .25s;
+}
+.an-btn-gold:hover { background: var(--acc2); transform: translateY(-2px); color: var(--p); }
+.an-btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 999px;
+  background: transparent; color: #fff;
+  font-family: var(--f); font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  border: 1.5px solid rgba(255,255,255,.28); cursor: pointer;
+  transition: border-color .25s, color .25s;
+}
+.an-btn-ghost:hover { border-color: var(--acc); color: var(--acc); }
+
+@media (max-width: 1024px) {
+  .an-inner { padding-left: 24px; padding-right: 24px; }
 }

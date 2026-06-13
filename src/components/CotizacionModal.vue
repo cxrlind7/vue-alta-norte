@@ -4,8 +4,11 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAdminState } from '../composables/useAdminState'
 import { setLoteEstatus } from '../composables/useLotes'
+import { supabase } from '../lib/supabase'
+import { useI18n } from '../composables/useI18n.js'
 
 const { isAdmin } = useAdminState()
+const { t } = useI18n()
 
 const props = defineProps({
     lote:    { type: Object, default: null },
@@ -14,16 +17,30 @@ const props = defineProps({
 const emit = defineEmits(['close', 'confirm'])
 
 const clienteNombre    = ref('')
+const clienteApellido  = ref('')
 const clienteTelefono  = ref('')
+const clienteEmail     = ref('')
 const enganchePct      = ref(20)
 const plazoMeses       = ref(48)
+
+const guardando        = ref(false)
+const duplicadoError   = ref('')   // mensaje de error de duplicado
 
 // Financiamiento hasta 48 meses, enganche desde 20 %
 const PLAZO_OPCIONES    = [48]
 const ENGANCHE_OPCIONES = [20, 25, 30, 40, 50]
 
+const emailValido = computed(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clienteEmail.value))
+
+const nombreCompleto = computed(() =>
+    `${clienteNombre.value.trim()} ${clienteApellido.value.trim()}`.trim()
+)
+
 const formularioInvalido = computed(() =>
-    !clienteNombre.value.trim() || clienteTelefono.value.length !== 10
+    !clienteNombre.value.trim() ||
+    !clienteApellido.value.trim() ||
+    clienteTelefono.value.length !== 10 ||
+    !emailValido.value
 )
 
 const precioTotal = computed(() => props.lote ? props.lote.superficie * props.lote.precio : 0)
@@ -110,8 +127,9 @@ function buildPdfBlob() {
         margin: { left: 25, right: 25 },
         head: [],
         body: [
-            ['CLIENTE',      clienteNombre.value],
+            ['CLIENTE',      nombreCompleto.value],
             ['TELÉFONO',     clienteTelefono.value],
+            ['CORREO',       clienteEmail.value],
             ['SECCIÓN',      `SECCIÓN ${props.manzana}`],
             ['LOTE',         `LOTE ${props.lote.lote}`],
             ['SUPERFICIE',   `${fmtArea(props.lote.superficie)} m²`],
@@ -159,26 +177,73 @@ function buildPdfBlob() {
     doc.setTextColor(...C_MUTED)
     doc.text('NOTA: LOS PRECIOS PUEDEN CAMBIAR EN CUALQUIER MOMENTO SIN PREVIO AVISO.', W / 2, footerY, { align: 'center' })
 
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(6.5)
+    const usdLines = doc.splitTextToSize(t.value.cotizador.usdNote, W - 40)
+    doc.text(usdLines, W / 2, footerY + 6, { align: 'center' })
+
     doc.setFillColor(...C_SAGE)
-    doc.rect(10, footerY + 5, W - 20, 0.6, 'F')
+    doc.rect(10, footerY + 14, W - 20, 0.6, 'F')
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(7)
     doc.setTextColor(...C_MUTED)
-    doc.text('© 2026 – Reserva Alta Norte', 10, footerY + 12)
+    doc.text('© 2026 – Reserva Alta Norte', 10, footerY + 21)
 
     doc.setTextColor(...C_GREEN)
     doc.setFont('helvetica', 'bold')
-    doc.text('altanorte.mx', W / 2, footerY + 12, { align: 'center' })
+    doc.text('altanorte.mx', W / 2, footerY + 21, { align: 'center' })
 
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C_MUTED)
-    doc.text(`Página 1 de 1`, W - 10, footerY + 12, { align: 'right' })
+    doc.text(`Página 1 de 1`, W - 10, footerY + 21, { align: 'right' })
 
     return doc.output('blob')
 }
 
-function descargarPDF() {
+// Guarda en Supabase; retorna true si OK, false si duplicado, null si sin Supabase
+async function saveCotizacion() {
+    if (!supabase || !props.lote) return null
+    const { error } = await supabase.from('cotizaciones').insert({
+        cliente_nombre:   clienteNombre.value.trim(),
+        cliente_apellido: clienteApellido.value.trim(),
+        cliente_telefono: clienteTelefono.value,
+        cliente_email:    clienteEmail.value,
+        seccion:          props.manzana,
+        lote_num:         props.lote.lote,
+        superficie:       props.lote.superficie,
+        precio_por_m2:    props.lote.precio,
+        precio_total:     precioTotal.value,
+        enganche_pct:     enganchePct.value,
+        enganche_amt:     engancheAmt.value,
+        saldo:            saldo.value,
+        plazo_meses:      plazoMeses.value,
+        pago_mensual:     montoPago.value,
+    })
+    if (error) {
+        if (error.code === '23505') {
+            if (error.message?.includes('telefono') || error.details?.includes('telefono')) {
+                duplicadoError.value = 'Este número de teléfono ya tiene una cotización registrada.'
+            } else if (error.message?.includes('email') || error.details?.includes('email')) {
+                duplicadoError.value = 'Este correo electrónico ya tiene una cotización registrada.'
+            } else {
+                duplicadoError.value = 'Ya existe una cotización con estos datos.'
+            }
+            return false
+        }
+        console.warn('Error al guardar cotización:', error)
+        return null
+    }
+    return true
+}
+
+async function descargarPDF() {
+    if (formularioInvalido.value) return
+    duplicadoError.value = ''
+    guardando.value = true
+    const resultado = await saveCotizacion()
+    guardando.value = false
+    if (resultado === false) return   // duplicado — no descargar
     const blob = buildPdfBlob()
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
@@ -190,11 +255,16 @@ function descargarPDF() {
     URL.revokeObjectURL(url)
 }
 
-function enviarPorCorreo() {
+async function enviarPorCorreo() {
     if (!props.lote || formularioInvalido.value) return
+    duplicadoError.value = ''
+    guardando.value = true
+    const resultado = await saveCotizacion()
+    guardando.value = false
+    if (resultado === false) return   // duplicado — no enviar
     const to      = import.meta.env.VITE_CONTACT_EMAIL || ''
-    const subject = `Interés de compra – Sección ${props.manzana} Lote ${props.lote.lote} – ${clienteNombre.value}`
-    const body    = `Hola equipo de Alta Norte,\n\nMi nombre es ${clienteNombre.value} y estoy interesado/a en adquirir el siguiente lote.\n\nTELÉFONO: ${clienteTelefono.value}\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual: ${fmt(montoPago.value)}\n\nQuedo en espera de su contacto.\n\n${clienteNombre.value}`
+    const subject = `Interés de compra – Sección ${props.manzana} Lote ${props.lote.lote} – ${nombreCompleto.value}`
+    const body    = `Hola equipo de Alta Norte,\n\nMi nombre es ${nombreCompleto.value} y estoy interesado/a en adquirir el siguiente lote.\n\nTELÉFONO: ${clienteTelefono.value}\n\n• Sección: ${props.manzana}\n• Lote: ${props.lote.lote}\n• Superficie: ${fmtArea(props.lote.superficie)} m²\n• Precio total: ${fmt(precioTotal.value)}\n• Enganche (${enganchePct.value}%): ${fmt(engancheAmt.value)}\n• Plazo: ${plazoMeses.value} meses\n• Pago mensual: ${fmt(montoPago.value)}\n\nQuedo en espera de su contacto.\n\n${nombreCompleto.value}`
     const link = document.createElement('a')
     link.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     link.target = '_blank'
@@ -204,10 +274,13 @@ function enviarPorCorreo() {
 }
 
 watch(() => props.lote, () => {
-    enganchePct.value    = 20
-    plazoMeses.value     = 24
-    clienteNombre.value  = ''
-    clienteTelefono.value = ''
+    enganchePct.value      = 20
+    plazoMeses.value       = 24
+    clienteNombre.value    = ''
+    clienteApellido.value  = ''
+    clienteTelefono.value  = ''
+    clienteEmail.value     = ''
+    duplicadoError.value   = ''
 })
 </script>
 
@@ -262,13 +335,24 @@ watch(() => props.lote, () => {
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
-                                       style="color:#153f35;">Nombre Completo *</label>
+                                       style="color:#153f35;">Nombre *</label>
                                 <input v-model="clienteNombre"
                                     class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
                                     style="border:1px solid rgba(21,63,53,.2); color:#153f35; background:#fff;
                                            --tw-ring-color:rgba(21,63,53,.3);"
-                                    placeholder="Tu nombre completo" />
+                                    placeholder="Tu nombre" />
                             </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
+                                       style="color:#153f35;">Apellido *</label>
+                                <input v-model="clienteApellido"
+                                    class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
+                                    style="border:1px solid rgba(21,63,53,.2); color:#153f35; background:#fff;
+                                           --tw-ring-color:rgba(21,63,53,.3);"
+                                    placeholder="Tu apellido" />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
                                        style="color:#153f35;">Teléfono * (10 dígitos)</label>
@@ -287,6 +371,30 @@ watch(() => props.lote, () => {
                                     }"
                                     placeholder="10 dígitos" />
                             </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-[.3em] block mb-1.5"
+                                       style="color:#153f35;">Correo Electrónico *</label>
+                                <input v-model="clienteEmail" type="email"
+                                    class="w-full rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 transition-all"
+                                    :style="{
+                                        border: clienteEmail.length > 0 && !emailValido
+                                            ? '1px solid #e53e3e'
+                                            : '1px solid rgba(21,63,53,.2)',
+                                        color: '#153f35', background: '#fff'
+                                    }"
+                                    placeholder="tu@correo.com" />
+                            </div>
+                        </div>
+
+                        <!-- Error duplicado -->
+                        <div v-if="duplicadoError"
+                             class="flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold"
+                             style="background:#fff1f0; border:1px solid #fca5a5; color:#b91c1c;">
+                            <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                            </svg>
+                            {{ duplicadoError }}
                         </div>
 
                         <!-- Enganche + Plazo — with badge info -->
@@ -391,6 +499,12 @@ watch(() => props.lote, () => {
                             </div>
                         </div>
 
+                        <!-- USD disclaimer -->
+                        <p class="text-[10px] leading-relaxed px-1 rounded-lg py-2 px-3"
+                           style="background:rgba(174,188,130,.12); color:#153f35; border:1px solid rgba(174,188,130,.25);">
+                          {{ t.cotizador.usdNote }}
+                        </p>
+
                         <!-- Lot info card -->
                         <div class="rounded-xl p-4 space-y-2 text-xs"
                              style="background:#fff; border:1px solid rgba(21,63,53,.1);">
@@ -414,28 +528,39 @@ watch(() => props.lote, () => {
 
                         <!-- Actions -->
                         <div class="space-y-2 mt-auto">
-                            <button @click="enviarPorCorreo" :disabled="formularioInvalido"
+                            <button @click="enviarPorCorreo"
+                                :disabled="formularioInvalido || guardando"
                                 class="w-full py-2.5 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
                                 style="background:#153f35; color:#fff;"
-                                :style="formularioInvalido ? 'opacity:.4; cursor:not-allowed;' : ''"
-                                @mouseenter="e => !formularioInvalido && (e.target.style.background='#0e2b25')"
+                                :style="(formularioInvalido || guardando) ? 'opacity:.4; cursor:not-allowed;' : ''"
+                                @mouseenter="e => !formularioInvalido && !guardando && (e.target.style.background='#0e2b25')"
                                 @mouseleave="e => e.target.style.background='#153f35'">
-                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg v-if="!guardando" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
-                                Enviar por Correo
+                                <svg v-else class="w-4 h-4 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                                </svg>
+                                {{ guardando ? 'Verificando...' : 'Enviar por Correo' }}
                             </button>
                             <button @click="descargarPDF"
+                                :disabled="formularioInvalido || guardando"
                                 class="w-full py-2.5 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm"
                                 style="border:1.5px solid #153f35; color:#153f35; background:transparent;"
-                                @mouseenter="e => e.currentTarget.style.background='rgba(21,63,53,.06)'"
+                                :style="(formularioInvalido || guardando) ? 'opacity:.4; cursor:not-allowed;' : ''"
+                                @mouseenter="e => !formularioInvalido && !guardando && (e.currentTarget.style.background='rgba(21,63,53,.06)')"
                                 @mouseleave="e => e.currentTarget.style.background='transparent'">
-                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg v-if="!guardando" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 10v6m0 0l-3-3m3 3l3-3M3 17v3a1 1 0 001 1h16a1 1 0 001-1v-3M3 10a9 9 0 1018 0" />
                                 </svg>
-                                Descargar PDF
+                                <svg v-else class="w-4 h-4 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                                </svg>
+                                {{ guardando ? 'Verificando...' : 'Descargar PDF' }}
                             </button>
                             <button v-if="isAdmin" @click="reservarLote"
                                 class="w-full py-2.5 font-bold rounded-xl transition-all flex items-center justify-center gap-2 text-sm"

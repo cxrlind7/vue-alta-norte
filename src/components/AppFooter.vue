@@ -1,10 +1,11 @@
 <template>
   <footer
     class="relative overflow-hidden border-t-2"
-    style="background-color:#153f35; border-color:#aebc82;"
+    style="background-color:#0e1a15; border-color:#aebc82; box-shadow: 0 -24px 80px rgba(0,0,0,0.55), inset 0 1px 0 rgba(174,188,130,0.15);"
   >
+    <!-- Texture removed -->
     <!-- Dot texture -->
-    <div class="absolute inset-0 opacity-[0.04] pointer-events-none">
+    <div class="absolute inset-0 opacity-[0.03] pointer-events-none">
       <svg width="60" height="60" viewBox="0 0 60 60" class="absolute inset-0 h-full w-full">
         <defs>
           <pattern id="ft-dot" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
@@ -24,6 +25,9 @@
       alt=""
     />
 
+    <!-- Background photo watermark -->
+    <div class="absolute inset-0 bg-cover bg-bottom pointer-events-none"
+         style="background-image:url('/images/bg_sierra.jpg'); opacity:0.05; mix-blend-mode:luminosity;"></div>
     <!-- Gradient glow top-left -->
     <div class="absolute top-0 left-0 w-80 h-80 pointer-events-none"
          style="background:radial-gradient(ellipse at top left,rgba(174,188,130,0.07),transparent 70%);"></div>
@@ -65,7 +69,7 @@
               :aria-label="social.label"
               class="w-10 h-10 rounded-xl flex items-center justify-center
                      border border-white/10 hover:border-secondary/50
-                     transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                     transition-all duration-300 hover:scale-110 hover:shadow-[0_0_20px_rgba(174,188,130,0.2)] group"
               style="background:rgba(255,255,255,0.06);"
             >
               <svg class="w-4 h-4 text-white/50 group-hover:text-white transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24" v-html="social.path"></svg>
@@ -182,9 +186,45 @@
         </div>
       </div>
 
+      <!-- Payment methods -->
+      <div class="border-t py-6 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+           style="border-color:rgba(174,188,130,0.12);">
+        <span class="text-[9px] tracking-[0.3em] uppercase font-bold shrink-0"
+              style="color:rgba(255,255,255,0.22);">ACEPTAMOS</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="inline-flex items-center justify-center rounded-md transition-all duration-300 hover:border-white/30"
+               style="border:1px solid rgba(255,255,255,0.15); width:48px; height:32px;">
+            <svg viewBox="0 0 576 512" class="w-8 h-8" style="color:rgba(255,255,255,0.42); fill:currentColor;">
+              <path d="M470.1 231.3s7.6 37.2 9.3 45l-33.4 0c3.3-8.9 16-43.5 16-43.5-.2 .3 3.3-9.1 5.3-14.9l2.8 13.4zM576 80l0 352c0 26.5-21.5 48-48 48L48 480c-26.5 0-48-21.5-48-48L0 80C0 53.5 21.5 32 48 32l480 0c26.5 0 48 21.5 48 48zM152.5 331.2l63.2-155.2-42.5 0-39.3 106-4.3-21.5-14-71.4c-2.3-9.9-9.4-12.7-18.2-13.1l-64.7 0-.7 3.1c15.8 4 29.9 9.8 42.2 17.1l35.8 135 42.5 0zm94.4 .2l25.2-155.4-40.2 0-25.1 155.4 40.1 0zm139.9-50.8c.2-17.7-10.6-31.2-33.7-42.3-14.1-7.1-22.7-11.9-22.7-19.2 .2-6.6 7.3-13.4 23.1-13.4 13.1-.3 22.7 2.8 29.9 5.9l3.6 1.7 5.5-33.6c-7.9-3.1-20.5-6.6-36-6.6-39.7 0-67.6 21.2-67.8 51.4-.3 22.3 20 34.7 35.2 42.2 15.5 7.6 20.8 12.6 20.8 19.3-.2 10.4-12.6 15.2-24.1 15.2-16 0-24.6-2.5-37.7-8.3l-5.3-2.5-5.6 34.9c9.4 4.3 26.8 8.1 44.8 8.3 42.2 .1 69.7-20.8 70-53zM528 331.4l-32.4-155.4-31.1 0c-9.6 0-16.9 2.8-21 12.9l-59.7 142.5 42.2 0s6.9-19.2 8.4-23.3l51.6 0c1.2 5.5 4.8 23.3 4.8 23.3l37.2 0z"/>
+            </svg>
+          </div>
+          <div class="inline-flex items-center justify-center rounded-md transition-all duration-300 hover:border-white/30"
+               style="border:1px solid rgba(255,255,255,0.15); width:48px; height:32px;">
+            <svg viewBox="0 0 576 512" class="w-8 h-8" style="color:rgba(255,255,255,0.42); fill:currentColor;">
+              <path d="M482.9 410.3c0 6.8-4.6 11.7-11.2 11.7-6.8 0-11.2-5.2-11.2-11.7s4.4-11.7 11.2-11.7c6.6 0 11.2 5.2 11.2 11.7zM172.1 398.6c-7.1 0-11.2 5.2-11.2 11.7S165 422 172.1 422c6.5 0 10.9-4.9 10.9-11.7-.1-6.5-4.4-11.7-10.9-11.7zm117.5-.3c-5.4 0-8.7 3.5-9.5 8.7l19.1 0c-.9-5.7-4.4-8.7-9.6-8.7zm107.8 .3c-6.8 0-10.9 5.2-10.9 11.7s4.1 11.7 10.9 11.7 11.2-4.9 11.2-11.7c0-6.5-4.4-11.7-11.2-11.7zm105.9 26.1c0 .3 .3 .5 .3 1.1 0 .3-.3 .5-.3 1.1-.3 .3-.3 .5-.5 .8-.3 .3-.5 .5-1.1 .5-.3 .3-.5 .3-1.1 .3-.3 0-.5 0-1.1-.3-.3 0-.5-.3-.8-.5-.3-.3-.5-.5-.5-.8-.3-.5-.3-.8-.3-1.1 0-.5 0-.8 .3-1.1 0-.5 .3-.8 .5-1.1 .3-.3 .5-.3 .8-.5 .5-.3 .8-.3 1.1-.3 .5 0 .8 0 1.1 .3 .5 .3 .8 .3 1.1 .5s.2 .6 .5 1.1zm-2.2 1.4c.5 0 .5-.3 .8-.3 .3-.3 .3-.5 .3-.8s0-.5-.3-.8c-.3 0-.5-.3-1.1-.3l-1.6 0 0 3.5 .8 0 0-1.4 .3 0 1.1 1.4 .8 0-1.1-1.3zM576 81l0 352c0 26.5-21.5 48-48 48L48 481c-26.5 0-48-21.5-48-48L0 81C0 54.5 21.5 33 48 33l480 0c26.5 0 48 21.5 48 48zM64 220.6c0 76.5 62.1 138.5 138.5 138.5 27.2 0 53.9-8.2 76.5-23.1-72.9-59.3-72.4-171.2 0-230.5-22.6-15-49.3-23.1-76.5-23.1-76.4-.1-138.5 62-138.5 138.2zM288 329.4c70.5-55 70.2-162.2 0-217.5-70.2 55.3-70.5 162.6 0 217.5zM145.7 405.7c0-8.7-5.7-14.4-14.7-14.7-4.6 0-9.5 1.4-12.8 6.5-2.4-4.1-6.5-6.5-12.2-6.5-3.8 0-7.6 1.4-10.6 5.4l0-4.4-8.2 0 0 36.7 8.2 0c0-18.9-2.5-30.2 9-30.2 10.2 0 8.2 10.2 8.2 30.2l7.9 0c0-18.3-2.5-30.2 9-30.2 10.2 0 8.2 10 8.2 30.2l8.2 0 0-23-.2 0zM190.6 392l-7.9 0 0 4.4c-2.7-3.3-6.5-5.4-11.7-5.4-10.3 0-18.2 8.2-18.2 19.3 0 11.2 7.9 19.3 18.2 19.3 5.2 0 9-1.9 11.7-5.4l0 4.6 7.9 0 0-36.8zm40.5 25.6c0-15-22.9-8.2-22.9-15.2 0-5.7 11.9-4.8 18.5-1.1l3.3-6.5c-9.4-6.1-30.2-6-30.2 8.2 0 14.3 22.9 8.3 22.9 15 0 6.3-13.5 5.8-20.7 .8l-3.5 6.3c11.2 7.6 32.6 6 32.6-7.5zm35.4 9.3l-2.2-6.8c-3.8 2.1-12.2 4.4-12.2-4.1l0-16.6 13.1 0 0-7.4-13.1 0 0-11.2-8.2 0 0 11.2-7.6 0 0 7.3 7.6 0 0 16.7c0 17.6 17.3 14.4 22.6 10.9zm13.3-13.4l27.5 0c0-16.2-7.4-22.6-17.4-22.6-10.6 0-18.2 7.9-18.2 19.3 0 20.5 22.6 23.9 33.8 14.2l-3.8-6c-7.8 6.4-19.6 5.8-21.9-4.9zM338.9 392c-4.6-2-11.6-1.8-15.2 4.4l0-4.4-8.2 0 0 36.7 8.2 0 0-20.7c0-11.6 9.5-10.1 12.8-8.4l2.4-7.6zm10.6 18.3c0-11.4 11.6-15.1 20.7-8.4l3.8-6.5c-11.6-9.1-32.7-4.1-32.7 15 0 19.8 22.4 23.8 32.7 15l-3.8-6.5c-9.2 6.5-20.7 2.6-20.7-8.6zM416.2 392l-8.2 0 0 4.4c-8.3-11-29.9-4.8-29.9 13.9 0 19.2 22.4 24.7 29.9 13.9l0 4.6 8.2 0 0-36.8zm33.7 0c-2.4-1.2-11-2.9-15.2 4.4l0-4.4-7.9 0 0 36.7 7.9 0 0-20.7c0-11 9-10.3 12.8-8.4l2.4-7.6zm40.3-14.9l-7.9 0 0 19.3c-8.2-10.9-29.9-5.1-29.9 13.9 0 19.4 22.5 24.6 29.9 13.9l0 4.6 7.9 0 0-51.7zm7.6-75.1l0 4.6 .8 0 0-4.6 1.9 0 0-.8-4.6 0 0 .8 1.9 0zm6.6 123.8c0-.5 0-1.1-.3-1.6-.3-.3-.5-.8-.8-1.1s-.8-.5-1.1-.8c-.5 0-1.1-.3-1.6-.3-.3 0-.8 .3-1.4 .3-.5 .3-.8 .5-1.1 .8-.5 .3-.8 .8-.8 1.1-.3 .5-.3 1.1-.3 1.6 0 .3 0 .8 .3 1.4 0 .3 .3 .8 .8 1.1 .3 .3 .5 .5 1.1 .8 .5 .3 1.1 .3 1.4 .3 .5 0 1.1 0 1.6-.3 .3-.3 .8-.5 1.1-.8s.5-.8 .8-1.1c.3-.6 .3-1.1 .3-1.4zm3.2-124.7l-1.4 0-1.6 3.5-1.6-3.5-1.4 0 0 5.4 .8 0 0-4.1 1.6 3.5 1.1 0 1.4-3.5 0 4.1 1.1 0 0-5.4zm4.4-80.5c0-76.2-62.1-138.3-138.5-138.3-27.2 0-53.9 8.2-76.5 23.1 72.1 59.3 73.2 171.5 0 230.5 22.6 15 49.5 23.1 76.5 23.1 76.4 .1 138.5-61.9 138.5-138.4z"/>
+            </svg>
+          </div>
+          <div class="inline-flex items-center justify-center rounded-md transition-all duration-300 hover:border-white/30"
+               style="border:1px solid rgba(255,255,255,0.15); width:48px; height:32px;">
+            <svg viewBox="0 0 576 512" class="w-8 h-8" style="color:rgba(255,255,255,0.42); fill:currentColor;">
+              <path d="M0 432c0 26.5 21.5 48 48 48l480 0c26.5 0 48-21.5 48-48l0-1.1-61.7 0-31.9-35.1-31.9 35.1-203.7 0 0-163.8-65.8 0 81.7-184.7 78.6 0 28.1 63.2 0-63.2 97.2 0 16.9 47.6 17-47.6 75.5 0 0-2.4c0-26.5-21.5-48-48-48L48 32C21.5 32 0 53.5 0 80L0 432zm440.4-21.7l42.2-46.3 42 46.3 51.4 0-68-72.1 68-72.1-50.6 0-42 46.7-41.5-46.7-51.4 0 67.5 72.5-67.4 71.6 0-33.1-83 0 0-22.2 80.9 0 0-32.3-80.9 0 0-22.4 83 0 0-33.1-122 0 0 143.2 171.8 0zm96.3-72l39.3 41.9 0-83.3-39.3 41.4zm-36.3-92l36.9-100.6 0 100.6 38.7 0 0-143.3-60.2 0-32.2 89.3-31.9-89.3-61.2 0 0 143.1-63.2-143.1-51.2 0-62.4 143.3 43 0 11.9-28.7 65.9 0 12 28.7 82.7 0 0-100.3 36.8 100.3 34.4 0zM282 185.4l19.5-46.9 19.4 46.9-38.9 0z"/>
+            </svg>
+          </div>
+          <div class="inline-flex items-center gap-1.5 px-3 rounded-md h-8 transition-all duration-300 hover:border-white/30"
+               style="border:1px solid rgba(255,255,255,0.15);">
+            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                 style="color:rgba(255,255,255,0.38);">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <span style="color:rgba(255,255,255,0.38); font-size:8px; font-weight:700; letter-spacing:0.1em;">PAGO SEGURO</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Bottom bar -->
-      <div class="border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4"
-           style="border-color:rgba(174,188,130,0.18);">
+      <div class="border-t pt-6 pb-2 flex flex-col sm:flex-row justify-between items-center gap-4"
+           style="border-color:rgba(174,188,130,0.12);">
         <p class="text-white/30 text-xs tracking-wide">{{ t.footer.rights }}</p>
         <div class="flex items-center gap-6">
           <a href="#" class="text-white/30 hover:text-white/60 text-xs transition-colors duration-200">
