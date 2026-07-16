@@ -37,20 +37,20 @@ function applyLocalReservations(data) {
 
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    if (!key?.startsWith('apartado_')) continue
+    if (!key?.startsWith('override_')) continue
     const raw = localStorage.getItem(key)
     if (!raw) continue
     try {
-      const { expiry } = JSON.parse(raw)
-      if (now > expiry) { toDelete.push(key); continue }
-      const withoutPrefix  = key.slice('apartado_'.length)
+      const { estatus, expiry } = JSON.parse(raw)
+      if (expiry && now > expiry) { toDelete.push(key); continue }
+      const withoutPrefix  = key.slice('override_'.length)
       const lastUnderscore = withoutPrefix.lastIndexOf('_')
       if (lastUnderscore < 0) continue
       const manzana = withoutPrefix.slice(0, lastUnderscore)
       const loteNum = parseInt(withoutPrefix.slice(lastUnderscore + 1))
       if (!manzana || isNaN(loteNum)) continue
       const found = data[manzana]?.find(l => l.lote === loteNum)
-      if (found) found.estatus = 'APARTADO'
+      if (found) found.estatus = estatus
     } catch (_) {}
   }
   toDelete.forEach(k => localStorage.removeItem(k))
@@ -99,9 +99,9 @@ export async function setLoteEstatus(manzana, loteNum, estatus) {
       .upsert({ manzana, lote_num: loteNum, estatus }, { onConflict: 'manzana,lote_num' })
     if (error) throw error
   } else {
-    const key    = `apartado_${manzana}_${loteNum}`
-    const expiry = Date.now() + 2 * 24 * 60 * 60 * 1000
-    localStorage.setItem(key, JSON.stringify({ expiry }))
+    const key     = `override_${manzana}_${loteNum}`
+    const expiry  = estatus === 'APARTADO' ? Date.now() + 2 * 24 * 60 * 60 * 1000 : null
+    localStorage.setItem(key, JSON.stringify({ estatus, expiry }))
   }
 }
 

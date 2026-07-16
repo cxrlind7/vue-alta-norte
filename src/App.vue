@@ -70,7 +70,7 @@
       <EventosSection />
       <ClimaSection />
       <LlegarSection />
-      <!-- <PlansSection /> lotes mapa interactivo-->
+      <PlansSection />
       <!-- <RecorridoSection /> -->
       <TourSection />
       <InfoPracticaSection />
@@ -145,8 +145,8 @@ const floatingWhatsapp = computed(() => {
   return `https://wa.me/526181090020?text=${msg}`
 })
 
-function handleLogout() {
-  logout()
+async function handleLogout() {
+  await logout()
   window.location.href = '/'
 }
 

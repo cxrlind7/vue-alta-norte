@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { useAdminState } from '../composables/useAdminState'
-import { setLoteEstatus } from '../composables/useLotes'
+import { setLoteEstatus, refreshReservations } from '../composables/useLotes'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../composables/useI18n.js'
 
@@ -176,27 +176,28 @@ function buildPdfBlob() {
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...C_MUTED)
     doc.text('NOTA: LOS PRECIOS PUEDEN CAMBIAR EN CUALQUIER MOMENTO SIN PREVIO AVISO.', W / 2, footerY, { align: 'center' })
+    doc.text('ESTA COTIZACIÓN ES INFORMATIVA. CONFIRMA EL PRECIO Y DISPONIBILIDAD CON UN AGENTE DE VENTAS ANTES DE PROCEDER.', W / 2, footerY + 4.5, { align: 'center' })
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(6.5)
     const usdLines = doc.splitTextToSize(t.value.cotizador.usdNote, W - 40)
-    doc.text(usdLines, W / 2, footerY + 6, { align: 'center' })
+    doc.text(usdLines, W / 2, footerY + 10.5, { align: 'center' })
 
     doc.setFillColor(...C_SAGE)
-    doc.rect(10, footerY + 14, W - 20, 0.6, 'F')
+    doc.rect(10, footerY + 18.5, W - 20, 0.6, 'F')
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(7)
     doc.setTextColor(...C_MUTED)
-    doc.text('© 2026 – Reserva Alta Norte', 10, footerY + 21)
+    doc.text('© 2026 – Reserva Alta Norte', 10, footerY + 25.5)
 
     doc.setTextColor(...C_GREEN)
     doc.setFont('helvetica', 'bold')
-    doc.text('altanorte.mx', W / 2, footerY + 21, { align: 'center' })
+    doc.text('altanorte.mx', W / 2, footerY + 25.5, { align: 'center' })
 
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C_MUTED)
-    doc.text(`Página 1 de 1`, W - 10, footerY + 21, { align: 'right' })
+    doc.text(`Página 1 de 1`, W - 10, footerY + 25.5, { align: 'right' })
 
     return doc.output('blob')
 }
@@ -233,6 +234,13 @@ async function saveCotizacion() {
         }
         console.warn('Error al guardar cotización:', error)
         return null
+    }
+    // Un lote cotizado deja de mostrarse como disponible hasta que ventas lo confirme o libere
+    try {
+        await setLoteEstatus(props.manzana, props.lote.lote, 'APARTADO')
+        await refreshReservations()
+    } catch (e) {
+        console.warn('No se pudo actualizar el estatus del lote tras la cotización:', e)
     }
     return true
 }
@@ -575,7 +583,7 @@ watch(() => props.lote, () => {
                         </div>
 
                         <p class="text-[9px] text-center leading-relaxed" style="color:#6b6b60;">
-                            Los precios pueden cambiar sin previo aviso.
+                            Los precios pueden cambiar sin previo aviso. Esta cotización es informativa; confirma el precio y disponibilidad con un agente de ventas antes de proceder.
                         </p>
                     </div>
                 </div>
