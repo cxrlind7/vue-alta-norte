@@ -357,7 +357,7 @@ function fmtArea(v) {
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="relative" style="width:793px;height:1123px;transform:rotate(-90deg);">
           <img
-            src="/svg/lotificacionFondo.webp"
+            src="../../public/svg/lotificacion.jpg"
             class="absolute inset-0 w-full h-full pointer-events-none"
             alt="Plano Lotificación"
           />

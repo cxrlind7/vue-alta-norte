@@ -274,441 +274,74 @@ let lon = 0, lat = 0
 const _lookTarget = new THREE.Vector3()  // reused every frame — no GC allocation
 
 // ─────────────────────────────────────────
-// AMBIENT SOUND ENGINE (Web Audio API)
+// AMBIENT SOUND ENGINE (real recordings, one per zone type)
 // ─────────────────────────────────────────
-let audioCtx   = null
-let masterGain = null
-let activeNodes = []
+const TARGET_VOLUME = 0.55
+const AUDIO_TALK  = '/audio/freesound_community-talking-people-6368.mp3'
+const AUDIO_RIVER = '/audio/oxidvideos-river-307903.mp3'
+const AUDIO_WIND  = '/audio/storegraphic-soft-wind-316392.mp3'
 
-// Sound profile per area — unique type per space
+// Sound file per area — matched to what that panorama actually shows
 const SOUND_PROFILES = {
-  'Casa Club':     { type: 'social_club' },   // Warm indoor social ambiance
-  'Salón':         { type: 'event_hall' },    // Large hall, subtle reverb
-  'Palapa':        { type: 'palapa_outdoor'}, // Nature + breeze + birds
-  'Hostal':        { type: 'pine_forest' },   // Sierra Madre pine forest
-  'Área de Esquí': { type: 'mountain_wind' }, // Strong gusting wind + cold
-  'Stand de Tiro': { type: 'open_field' },    // Quiet outdoor field
+  'Casa Club':     AUDIO_TALK,   // Indoor social club, guests chatting
+  'Salón':         AUDIO_TALK,   // Event hall, guests chatting
+  'Hostal':        AUDIO_TALK,   // Lobby/reception, guests at the counter
+  'Palapa':        AUDIO_RIVER,  // Deck overlooking the river
+  'Área de Esquí': AUDIO_WIND,   // Open-air mountain slope
+  'Stand de Tiro': AUDIO_WIND,   // Open outdoor field
+}
+
+let ambientAudio = null
+let fadeRAF      = null
+
+function fadeTo(el, target, durationMs, onDone) {
+  if (fadeRAF) cancelAnimationFrame(fadeRAF)
+  const start = el.volume
+  const t0 = performance.now()
+  function step(now) {
+    const p = Math.min(1, (now - t0) / durationMs)
+    el.volume = start + (target - start) * p
+    if (p < 1) {
+      fadeRAF = requestAnimationFrame(step)
+    } else {
+      fadeRAF = null
+      if (onDone) onDone()
+    }
+  }
+  fadeRAF = requestAnimationFrame(step)
 }
 
 function initAudio() {
-  if (audioCtx) return
-  audioCtx   = new (window.AudioContext || window.webkitAudioContext)()
-  masterGain = audioCtx.createGain()
-  masterGain.gain.value = soundMuted.value ? 0 : 0.6
-  masterGain.connect(audioCtx.destination)
-}
-
-function makeNoise(type = 'brown') {
-  const bufSize = audioCtx.sampleRate * 4
-  const buf     = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate)
-  const data    = buf.getChannelData(0)
-  let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0
-  for (let i = 0; i < bufSize; i++) {
-    const w = Math.random() * 2 - 1
-    if (type === 'brown') {
-      b0 = (b0 + 0.02 * w) / 1.02; data[i] = b0 * 3.5
-    } else if (type === 'pink') {
-      b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759
-      b2=0.96900*b2+w*0.1538520; b3=0.86650*b3+w*0.3104856
-      b4=0.55000*b4+w*0.5329522; b5=-0.7616*b5-w*0.0168980
-      data[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926
-    } else {
-      data[i] = w
-    }
-  }
-  const src = audioCtx.createBufferSource()
-  src.buffer = buf
-  src.loop   = true
-  return src
-}
-
-function makeOsc(freq, type = 'sine') {
-  const osc = audioCtx.createOscillator()
-  osc.type = type
-  osc.frequency.value = freq
-  return osc
-}
-
-// LFO that gently modulates a gain node between lo and hi at lfoHz rate
-function attachLFO(gainNode, lo, hi, lfoHz = 0.1) {
-  const lfo   = audioCtx.createOscillator()
-  const lfoG  = audioCtx.createGain()
-  const mid   = (lo + hi) / 2
-  const range = (hi - lo) / 2
-  lfo.frequency.value = lfoHz
-  lfoG.gain.value = range
-  gainNode.gain.value = mid
-  lfo.connect(lfoG)
-  lfoG.connect(gainNode.gain)
-  lfo.start()
-  return lfo
-}
-
-function buildSoundscape(profile) {
-  const nodes = []
-  const t = profile?.type || 'palapa_outdoor'
-
-  if (t === 'social_club') {
-    // ── Casa Club: warm luxury clubhouse ──
-    // Subtle HVAC hum
-    const hum = makeOsc(55, 'sine'); const gHum = audioCtx.createGain(); gHum.gain.value = 0.016
-    hum.connect(gHum); gHum.connect(masterGain); hum.start(); nodes.push(hum)
-
-    // Crowd babble: pink noise split across 5 speech-band BPFs.
-    // Each band has RANDOM amplitude scheduling (talk/pause) — irregular bursts ≠ water.
-    const murmurCC = makeNoise('pink'); murmurCC.start(); nodes.push(murmurCC)
-    ;[220, 310, 430, 560, 710].forEach((freq, i) => {
-      const bpf = audioCtx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=freq; bpf.Q.value=3.5
-      const g = audioCtx.createGain(); g.gain.value = 0
-      murmurCC.connect(bpf); bpf.connect(g); g.connect(masterGain)
-      function talk() {
-        if (!audioCtx) return
-        const now = audioCtx.currentTime
-        const speaking = Math.random() < 0.55
-        const vol     = speaking ? 0.022 + Math.random() * 0.026 : 0
-        const attack  = 0.05 + Math.random() * 0.07
-        const hold    = speaking ? 0.18 + Math.random() * 0.55 : 0.05 + Math.random() * 0.18
-        g.gain.cancelScheduledValues(now)
-        g.gain.setValueAtTime(g.gain.value, now)
-        g.gain.linearRampToValueAtTime(vol, now + attack)
-        g.gain.setValueAtTime(vol, now + attack + hold)
-        g.gain.linearRampToValueAtTime(0, now + attack + hold + 0.07)
-        setTimeout(talk, (attack + hold + 0.08 + Math.random() * 0.25) * 1000)
-      }
-      setTimeout(talk, i * 130 + Math.random() * 180)
-    })
-
-    // Occasional glass clink
-    const clink = audioCtx.createOscillator(); clink.type = 'sine'; clink.frequency.value = 2400
-    const clinkEnv = audioCtx.createGain(); clinkEnv.gain.value = 0
-    const clinkBpf = audioCtx.createBiquadFilter(); clinkBpf.type='bandpass'; clinkBpf.frequency.value=2400; clinkBpf.Q.value=18
-    clink.connect(clinkBpf); clinkBpf.connect(clinkEnv); clinkEnv.connect(masterGain); clink.start()
-    let nextClink = audioCtx.currentTime + 6
-    function schedClink() {
-      if (!audioCtx) return
-      clink.frequency.setValueAtTime(1900 + Math.random() * 900, nextClink)
-      clinkEnv.gain.setValueAtTime(0, nextClink)
-      clinkEnv.gain.linearRampToValueAtTime(0.014 + Math.random() * 0.007, nextClink + 0.007)
-      clinkEnv.gain.exponentialRampToValueAtTime(0.0001, nextClink + 0.5)
-      nextClink += 9 + Math.random() * 16
-      setTimeout(schedClink, (nextClink - audioCtx.currentTime) * 1000 - 200)
-    }
-    setTimeout(schedClink, (nextClink - audioCtx.currentTime) * 1000 - 200)
-    nodes.push(clink)
-
-  } else if (t === 'event_hall') {
-    // ── Salón: event hall with people ──
-    // Room resonance (low oscillator — not noise)
-    const deep = makeOsc(42, 'sine'); const gD = audioCtx.createGain(); gD.gain.value = 0.010
-    deep.connect(gD); gD.connect(masterGain); deep.start(); nodes.push(deep)
-
-    // Crowd babble: 4 speech bands, random talk/pause scheduling
-    const murmurEH = makeNoise('pink'); murmurEH.start(); nodes.push(murmurEH)
-    ;[230, 340, 480, 640].forEach((freq, i) => {
-      const bpf = audioCtx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=freq; bpf.Q.value=3.5
-      const g = audioCtx.createGain(); g.gain.value = 0
-      murmurEH.connect(bpf); bpf.connect(g); g.connect(masterGain)
-      function talk() {
-        if (!audioCtx) return
-        const now = audioCtx.currentTime
-        const speaking = Math.random() < 0.55
-        const vol     = speaking ? 0.025 + Math.random() * 0.030 : 0
-        const attack  = 0.05 + Math.random() * 0.07
-        const hold    = speaking ? 0.20 + Math.random() * 0.60 : 0.06 + Math.random() * 0.20
-        g.gain.cancelScheduledValues(now)
-        g.gain.setValueAtTime(g.gain.value, now)
-        g.gain.linearRampToValueAtTime(vol, now + attack)
-        g.gain.setValueAtTime(vol, now + attack + hold)
-        g.gain.linearRampToValueAtTime(0, now + attack + hold + 0.07)
-        setTimeout(talk, (attack + hold + 0.08 + Math.random() * 0.25) * 1000)
-      }
-      setTimeout(talk, i * 150 + Math.random() * 200)
-    })
-
-    // Occasional glass clink
-    const clink = audioCtx.createOscillator(); clink.type = 'sine'; clink.frequency.value = 2200
-    const clinkEnv = audioCtx.createGain(); clinkEnv.gain.value = 0
-    const clinkBpf = audioCtx.createBiquadFilter(); clinkBpf.type='bandpass'; clinkBpf.frequency.value=2200; clinkBpf.Q.value=16
-    clink.connect(clinkBpf); clinkBpf.connect(clinkEnv); clinkEnv.connect(masterGain); clink.start()
-    let nextClink = audioCtx.currentTime + 5
-    function schedClink() {
-      if (!audioCtx) return
-      clink.frequency.setValueAtTime(1800 + Math.random() * 800, nextClink)
-      clinkEnv.gain.setValueAtTime(0, nextClink)
-      clinkEnv.gain.linearRampToValueAtTime(0.013 + Math.random() * 0.006, nextClink + 0.007)
-      clinkEnv.gain.exponentialRampToValueAtTime(0.0001, nextClink + 0.45)
-      nextClink += 8 + Math.random() * 14
-      setTimeout(schedClink, (nextClink - audioCtx.currentTime) * 1000 - 200)
-    }
-    setTimeout(schedClink, (nextClink - audioCtx.currentTime) * 1000 - 200)
-    nodes.push(clink)
-
-  } else if (t === 'palapa_outdoor') {
-    // ── Palapa: covered outdoor area, mountain breeze + birds ──
-    // Breeze through wood/thatch structure
-    const breeze = makeNoise('pink')
-    const bpfB = audioCtx.createBiquadFilter(); bpfB.type='bandpass'; bpfB.frequency.value=850; bpfB.Q.value=0.5
-    const gB = audioCtx.createGain()
-    const lfoB = attachLFO(gB, 0.032, 0.12, 0.07)
-    breeze.connect(bpfB); bpfB.connect(gB); gB.connect(masterGain)
-    breeze.start(); nodes.push(breeze, lfoB)
-
-    // Leaf/frond rustle
-    const rustle = makeNoise('white')
-    const hpfR = audioCtx.createBiquadFilter(); hpfR.type='highpass'; hpfR.frequency.value=3000
-    const lpfR = audioCtx.createBiquadFilter(); lpfR.type='lowpass'; lpfR.frequency.value=6000
-    const gR = audioCtx.createGain(); gR.gain.value = 0.022
-    rustle.connect(hpfR); hpfR.connect(lpfR); lpfR.connect(gR); gR.connect(masterGain)
-    rustle.start(); nodes.push(rustle)
-
-    // Distant low mountain ambiance
-    const distant = makeNoise('brown')
-    const lpfDist = audioCtx.createBiquadFilter(); lpfDist.type='lowpass'; lpfDist.frequency.value=140
-    const gDist = audioCtx.createGain(); gDist.gain.value = 0.028
-    distant.connect(lpfDist); lpfDist.connect(gDist); gDist.connect(masterGain)
-    distant.start(); nodes.push(distant)
-
-    // 5 bird types with frequency-swept chirps for realism
-    const birdDefs = [
-      { f: 3200, range: [3,6],   dur: 0.08, vol: 0.022, sweep:  400 },
-      { f: 2600, range: [4,9],   dur: 0.12, vol: 0.018, sweep: -300 },
-      { f: 4100, range: [6,12],  dur: 0.06, vol: 0.014, sweep:  600 },
-      { f: 2900, range: [5,10],  dur: 0.10, vol: 0.020, sweep:  200 },
-      { f: 3500, range: [7,14],  dur: 0.07, vol: 0.012, sweep: -500 },
-    ]
-    birdDefs.forEach((def, idx) => {
-      const bird = audioCtx.createOscillator(); bird.type = 'sine'; bird.frequency.value = def.f
-      const bEnv = audioCtx.createGain(); bEnv.gain.value = 0
-      bird.connect(bEnv); bEnv.connect(masterGain); bird.start()
-      let next = audioCtx.currentTime + 1.5 + idx * 0.7
-      function sched() {
-        if (!audioCtx) return
-        const startF = def.f + Math.random() * 300 - 150
-        bird.frequency.setValueAtTime(startF, next)
-        bird.frequency.linearRampToValueAtTime(startF + def.sweep * (0.7 + Math.random() * 0.6), next + def.dur)
-        bEnv.gain.setValueAtTime(0, next)
-        bEnv.gain.linearRampToValueAtTime(def.vol, next + def.dur * 0.3)
-        bEnv.gain.linearRampToValueAtTime(0, next + def.dur)
-        next += def.range[0] + Math.random() * (def.range[1] - def.range[0])
-        setTimeout(sched, (next - audioCtx.currentTime) * 1000 - 200)
-      }
-      setTimeout(sched, (next - audioCtx.currentTime) * 1000 - 200)
-      nodes.push(bird)
-    })
-
-  } else if (t === 'pine_forest') {
-    // ── Hostal: cozy mountain inn ──
-    // Subtle indoor hum
-    const hum = makeOsc(52, 'sine'); const gHum = audioCtx.createGain(); gHum.gain.value = 0.014
-    hum.connect(gHum); gHum.connect(masterGain); hum.start(); nodes.push(hum)
-
-    // Fireplace: low-frequency brown noise (<80 Hz) = rumble, not water
-    const fire = makeNoise('brown')
-    const lpfFire = audioCtx.createBiquadFilter(); lpfFire.type='lowpass'; lpfFire.frequency.value=75
-    const gFire = audioCtx.createGain()
-    const lfoFire = attachLFO(gFire, 0.018, 0.045, 1.6)
-    fire.connect(lpfFire); lpfFire.connect(gFire); gFire.connect(masterGain)
-    fire.start(); nodes.push(fire, lfoFire)
-
-    // Soft crowd babble: 3 bands, quieter (fewer guests)
-    const murmurH = makeNoise('pink'); murmurH.start(); nodes.push(murmurH)
-    ;[250, 380, 550].forEach((freq, i) => {
-      const bpf = audioCtx.createBiquadFilter(); bpf.type='bandpass'; bpf.frequency.value=freq; bpf.Q.value=3.5
-      const g = audioCtx.createGain(); g.gain.value = 0
-      murmurH.connect(bpf); bpf.connect(g); g.connect(masterGain)
-      function talk() {
-        if (!audioCtx) return
-        const now = audioCtx.currentTime
-        const speaking = Math.random() < 0.45
-        const vol     = speaking ? 0.014 + Math.random() * 0.016 : 0
-        const attack  = 0.06 + Math.random() * 0.08
-        const hold    = speaking ? 0.22 + Math.random() * 0.65 : 0.08 + Math.random() * 0.30
-        g.gain.cancelScheduledValues(now)
-        g.gain.setValueAtTime(g.gain.value, now)
-        g.gain.linearRampToValueAtTime(vol, now + attack)
-        g.gain.setValueAtTime(vol, now + attack + hold)
-        g.gain.linearRampToValueAtTime(0, now + attack + hold + 0.08)
-        setTimeout(talk, (attack + hold + 0.1 + Math.random() * 0.35) * 1000)
-      }
-      setTimeout(talk, i * 200 + Math.random() * 250)
-    })
-
-    // Very faint pine wind outside (high-shelf only, above water range)
-    const pines = makeNoise('white')
-    const hpfPine = audioCtx.createBiquadFilter(); hpfPine.type='highpass'; hpfPine.frequency.value=4500
-    const gP = audioCtx.createGain(); gP.gain.value = 0.010
-    pines.connect(hpfPine); hpfPine.connect(gP); gP.connect(masterGain)
-    pines.start(); nodes.push(pines)
-
-    // Occasional distant bird through window
-    const bird = audioCtx.createOscillator(); bird.type = 'sine'; bird.frequency.value = 3200
-    const bEnv = audioCtx.createGain(); bEnv.gain.value = 0
-    bird.connect(bEnv); bEnv.connect(masterGain); bird.start()
-    let nextB = audioCtx.currentTime + 4
-    function schedB() {
-      if (!audioCtx) return
-      const startF = 3000 + Math.random() * 400
-      bird.frequency.setValueAtTime(startF, nextB)
-      bird.frequency.linearRampToValueAtTime(startF - 350, nextB + 0.14)
-      bEnv.gain.setValueAtTime(0, nextB)
-      bEnv.gain.linearRampToValueAtTime(0.006, nextB + 0.05)
-      bEnv.gain.linearRampToValueAtTime(0, nextB + 0.16)
-      nextB += 10 + Math.random() * 18
-      setTimeout(schedB, (nextB - audioCtx.currentTime) * 1000 - 200)
-    }
-    setTimeout(schedB, (nextB - audioCtx.currentTime) * 1000 - 200)
-    nodes.push(bird)
-
-  } else if (t === 'mountain_wind') {
-    // ── Área de Esquí: alpine wind — oscillators only, zero mid-band noise ──
-    // Primary wind moan: low sawtooth + lowpass + amplitude LFO + frequency LFO
-    const moan = makeOsc(58, 'sawtooth')
-    const lpfMoan = audioCtx.createBiquadFilter(); lpfMoan.type='lowpass'; lpfMoan.frequency.value=130
-    const gMoan = audioCtx.createGain()
-    const lfoMoan = attachLFO(gMoan, 0.015, 0.065, 0.062)
-    const lfoMoanF = audioCtx.createOscillator(); lfoMoanF.frequency.value = 0.035
-    const lfoMoanFG = audioCtx.createGain(); lfoMoanFG.gain.value = 22
-    lfoMoanF.connect(lfoMoanFG); lfoMoanFG.connect(moan.frequency)
-    moan.connect(lpfMoan); lpfMoan.connect(gMoan); gMoan.connect(masterGain)
-    moan.start(); lfoMoanF.start(); nodes.push(moan, lfoMoan, lfoMoanF)
-
-    // Sub-bass wind pressure (very low, felt more than heard)
-    const sub = makeOsc(38, 'triangle')
-    const lpfSub = audioCtx.createBiquadFilter(); lpfSub.type='lowpass'; lpfSub.frequency.value=70
-    const gSub = audioCtx.createGain()
-    const lfoSub = attachLFO(gSub, 0.006, 0.030, 0.048)
-    sub.connect(lpfSub); lpfSub.connect(gSub); gSub.connect(masterGain)
-    sub.start(); nodes.push(sub, lfoSub)
-
-    // Wind whistle through obstacles: oscillator only, frequency-swept
-    const whistle = makeOsc(780, 'sine')
-    const gWh = audioCtx.createGain()
-    const lfoWh = attachLFO(gWh, 0, 0.016, 0.11)
-    const lfoWhF = audioCtx.createOscillator(); lfoWhF.frequency.value = 0.07
-    const lfoWhFG = audioCtx.createGain(); lfoWhFG.gain.value = 110
-    lfoWhF.connect(lfoWhFG); lfoWhFG.connect(whistle.frequency)
-    whistle.connect(gWh); gWh.connect(masterGain)
-    whistle.start(); lfoWhF.start(); nodes.push(whistle, lfoWh, lfoWhF)
-
-    // Thin high-freq air: white noise only above 5.5 kHz (well above water range)
-    const air = makeNoise('white')
-    const hpfAir = audioCtx.createBiquadFilter(); hpfAir.type='highpass'; hpfAir.frequency.value=5500
-    const gAir = audioCtx.createGain()
-    const lfoAir = attachLFO(gAir, 0.004, 0.018, 0.09)
-    air.connect(hpfAir); hpfAir.connect(gAir); gAir.connect(masterGain)
-    air.start(); nodes.push(air, lfoAir)
-
-    // Distant mountain birds (sparse, open-air feel)
-    const skibirds = [
-      { f: 3400, range: [8,16],  dur: 0.09, vol: 0.010, sweep:  450 },
-      { f: 2800, range: [12,22], dur: 0.12, vol: 0.008, sweep: -300 },
-    ]
-    skibirds.forEach((def, idx) => {
-      const bird = audioCtx.createOscillator(); bird.type = 'sine'; bird.frequency.value = def.f
-      const bEnv = audioCtx.createGain(); bEnv.gain.value = 0
-      bird.connect(bEnv); bEnv.connect(masterGain); bird.start()
-      let next = audioCtx.currentTime + 3 + idx * 2
-      function sched() {
-        if (!audioCtx) return
-        const startF = def.f + Math.random() * 250 - 125
-        bird.frequency.setValueAtTime(startF, next)
-        bird.frequency.linearRampToValueAtTime(startF + def.sweep, next + def.dur)
-        bEnv.gain.setValueAtTime(0, next)
-        bEnv.gain.linearRampToValueAtTime(def.vol, next + def.dur * 0.3)
-        bEnv.gain.linearRampToValueAtTime(0, next + def.dur)
-        next += def.range[0] + Math.random() * (def.range[1] - def.range[0])
-        setTimeout(sched, (next - audioCtx.currentTime) * 1000 - 200)
-      }
-      setTimeout(sched, (next - audioCtx.currentTime) * 1000 - 200)
-      nodes.push(bird)
-    })
-
-  } else {
-    // ── Stand de Tiro: open outdoor field — no mid-range noise ──
-    // Open-air wind: oscillator moan (low), not noise
-    const fieldMoan = makeOsc(48, 'sine')
-    const lpfFM = audioCtx.createBiquadFilter(); lpfFM.type='lowpass'; lpfFM.frequency.value=90
-    const gFM = audioCtx.createGain()
-    const lfoFM = attachLFO(gFM, 0.008, 0.030, 0.055)
-    fieldMoan.connect(lpfFM); lpfFM.connect(gFM); gFM.connect(masterGain)
-    fieldMoan.start(); nodes.push(fieldMoan, lfoFM)
-
-    // High-freq air only (>5 kHz — above water range)
-    const air = makeNoise('white')
-    const hpfAir = audioCtx.createBiquadFilter(); hpfAir.type='highpass'; hpfAir.frequency.value=5000
-    const gAir = audioCtx.createGain()
-    const lfoAir = attachLFO(gAir, 0.005, 0.018, 0.09)
-    air.connect(hpfAir); hpfAir.connect(gAir); gAir.connect(masterGain)
-    air.start(); nodes.push(air, lfoAir)
-
-    // Insect chorus: BPF at 4500 Hz (well above water range)
-    const insects = makeNoise('white')
-    const bpfI = audioCtx.createBiquadFilter(); bpfI.type='bandpass'; bpfI.frequency.value=4500; bpfI.Q.value=2
-    const gI = audioCtx.createGain()
-    const lfoI = attachLFO(gI, 0.006, 0.022, 0.28)
-    insects.connect(bpfI); bpfI.connect(gI); gI.connect(masterGain)
-    insects.start(); nodes.push(insects, lfoI)
-
-    // Sparse far-off bird
-    const bd = audioCtx.createOscillator(); bd.type = 'sine'; bd.frequency.value = 2700
-    const bdEnv = audioCtx.createGain(); bdEnv.gain.value = 0
-    bd.connect(bdEnv); bdEnv.connect(masterGain); bd.start()
-    let nextBd = audioCtx.currentTime + 4
-    function schedBd() {
-      if (!audioCtx) return
-      const startF = 2400 + Math.random() * 700
-      bd.frequency.setValueAtTime(startF, nextBd)
-      bd.frequency.linearRampToValueAtTime(startF + (Math.random() > 0.5 ? 350 : -350), nextBd + 0.13)
-      bdEnv.gain.setValueAtTime(0, nextBd)
-      bdEnv.gain.linearRampToValueAtTime(0.011, nextBd + 0.04)
-      bdEnv.gain.linearRampToValueAtTime(0, nextBd + 0.15)
-      nextBd += 8 + Math.random() * 16
-      setTimeout(schedBd, (nextBd - audioCtx.currentTime) * 1000 - 200)
-    }
-    setTimeout(schedBd, (nextBd - audioCtx.currentTime) * 1000 - 200)
-    nodes.push(bd)
-  }
-  return nodes
+  if (ambientAudio) return
+  ambientAudio = new Audio()
+  ambientAudio.loop   = true
+  ambientAudio.volume = 0
 }
 
 function playAmbientForArea(area) {
-  if (!audioCtx) return
-  // Fade out old sounds
-  const now = audioCtx.currentTime
-  masterGain.gain.cancelScheduledValues(now)
-  masterGain.gain.setValueAtTime(masterGain.gain.value, now)
-  masterGain.gain.linearRampToValueAtTime(0, now + 0.8)
-  setTimeout(() => {
-    activeNodes.forEach(n => { try { n.stop() } catch {} })
-    activeNodes = []
-    activeNodes = buildSoundscape(SOUND_PROFILES[area])
-    if (!soundMuted.value) {
-      masterGain.gain.cancelScheduledValues(audioCtx.currentTime)
-      masterGain.gain.setValueAtTime(0, audioCtx.currentTime)
-      masterGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 1.5)
-    }
-  }, 850)
+  if (!ambientAudio) return
+  const src = SOUND_PROFILES[area] || AUDIO_WIND
+  if (ambientAudio.src.endsWith(src)) return
+  fadeTo(ambientAudio, 0, 500, () => {
+    ambientAudio.src = src
+    ambientAudio.currentTime = 0
+    ambientAudio.play().catch(() => {})
+    if (!soundMuted.value) fadeTo(ambientAudio, TARGET_VOLUME, 1200)
+  })
 }
 
 function stopAllAudio() {
-  if (!audioCtx) return
-  masterGain.gain.cancelScheduledValues(audioCtx.currentTime)
-  masterGain.gain.setValueAtTime(masterGain.gain.value, audioCtx.currentTime)
-  masterGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6)
-  setTimeout(() => {
-    activeNodes.forEach(n => { try { n.stop() } catch {} })
-    activeNodes = []
-    if (audioCtx) { audioCtx.close(); audioCtx = null; masterGain = null }
-  }, 700)
+  if (!ambientAudio) return
+  fadeTo(ambientAudio, 0, 500, () => {
+    ambientAudio.pause()
+    ambientAudio = null
+  })
 }
 
 function toggleMute() {
   soundMuted.value = !soundMuted.value
-  if (!masterGain) return
-  const now = audioCtx.currentTime
-  masterGain.gain.cancelScheduledValues(now)
-  masterGain.gain.setValueAtTime(masterGain.gain.value, now)
-  masterGain.gain.linearRampToValueAtTime(soundMuted.value ? 0 : 0.6, now + 0.5)
+  if (!ambientAudio) return
+  fadeTo(ambientAudio, soundMuted.value ? 0 : TARGET_VOLUME, 400)
 }
 
 // ─────────────────────────────────────────
@@ -741,11 +374,10 @@ function closeTour() {
 function startAudio() {
   setTimeout(() => {
     initAudio()
-    activeNodes = buildSoundscape(SOUND_PROFILES[currentRoom.value.area])
-    if (!soundMuted.value) {
-      masterGain.gain.setValueAtTime(0, audioCtx.currentTime)
-      masterGain.gain.linearRampToValueAtTime(0.6, audioCtx.currentTime + 2)
-    }
+    const src = SOUND_PROFILES[currentRoom.value.area] || AUDIO_WIND
+    ambientAudio.src = src
+    ambientAudio.play().catch(() => {})
+    if (!soundMuted.value) fadeTo(ambientAudio, TARGET_VOLUME, 2000)
   }, 300)
 }
 

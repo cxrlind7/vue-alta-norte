@@ -41,7 +41,7 @@
               <!-- Blurry lotification image -->
               <div
                 class="absolute inset-0 bg-cover bg-center"
-                style="background-image:url('/svg/lotificacionFondo.webp');
+                style="background-image:url('/svg/lotificacionsvg.svg');
                        filter:blur(6px) brightness(0.55) saturate(0.7);
                        transform:scale(1.04);"
               ></div>

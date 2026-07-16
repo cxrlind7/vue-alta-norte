@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6">
+  <div class="p-6 max-w-5xl mx-auto">
 
     <!-- Header + stats -->
     <div class="mb-6">
@@ -96,62 +96,115 @@
     <div v-else class="rounded-2xl overflow-hidden"
          style="border:1px solid rgba(21,63,53,.1); box-shadow:0 2px 16px rgba(21,63,53,.07);">
       <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
+        <table class="min-w-full text-xs">
           <thead>
             <tr style="background:#153f35;">
-              <th class="px-4 py-3 text-left text-white font-bold tracking-wide whitespace-nowrap">Manzana</th>
-              <th class="px-4 py-3 text-center text-white font-bold tracking-wide whitespace-nowrap">Lote</th>
-              <th class="px-4 py-3 text-right text-white font-bold tracking-wide whitespace-nowrap">m²</th>
-              <th class="px-4 py-3 text-left font-bold tracking-wide whitespace-nowrap" style="color:#aebc82;">Categoría</th>
-              <th class="px-4 py-3 text-right text-white font-bold tracking-wide whitespace-nowrap">$/m²</th>
-              <th class="px-4 py-3 text-right text-white font-bold tracking-wide whitespace-nowrap">Precio Total</th>
-              <th class="px-4 py-3 text-center text-white font-bold tracking-wide whitespace-nowrap">Estatus</th>
+              <th class="px-3 py-2 text-left text-white font-bold tracking-wide whitespace-nowrap">Manzana</th>
+              <th class="px-3 py-2 text-center text-white font-bold tracking-wide whitespace-nowrap">Lote</th>
+              <th class="px-3 py-2 text-right text-white font-bold tracking-wide whitespace-nowrap">m²</th>
+              <th class="px-3 py-2 text-left font-bold tracking-wide whitespace-nowrap" style="color:#aebc82;">Categoría</th>
+              <th class="px-3 py-2 text-right text-white font-bold tracking-wide whitespace-nowrap">$/m²</th>
+              <th class="px-3 py-2 text-right text-white font-bold tracking-wide whitespace-nowrap">Precio Total</th>
+              <th class="px-3 py-2 text-center text-white font-bold tracking-wide whitespace-nowrap">Estatus</th>
+              <th class="px-3 py-2 text-center text-white font-bold tracking-wide whitespace-nowrap">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="(l, i) in filasFiltradas" :key="`${l.manzana}-${l.lote}`"
+              v-for="(l, i) in filasPaginadas" :key="`${l.manzana}-${l.lote}`"
               :style="i % 2 === 0 ? 'background:#fff;' : 'background:#f6f6f4;'"
               class="border-b"
               style="border-color:rgba(21,63,53,.06);"
             >
-              <td class="px-4 py-2.5 font-bold" style="color:#153f35;">{{ l.manzana }}</td>
-              <td class="px-4 py-2.5 text-center font-mono" style="color:#153f35;">{{ l.lote }}</td>
-              <td class="px-4 py-2.5 text-right font-mono text-xs" style="color:#6b6b60;">
+              <td class="px-3 py-1.5 font-bold" style="color:#153f35;">{{ l.manzana }}</td>
+              <td class="px-3 py-1.5 text-center font-mono" style="color:#153f35;">{{ l.lote }}</td>
+              <td class="px-3 py-1.5 text-right font-mono" style="color:#6b6b60;">
                 {{ fmtNum(l.superficie) }}
               </td>
-              <td class="px-4 py-2.5 text-xs" style="color:#6b6b60;">{{ l.categoria || '—' }}</td>
-              <td class="px-4 py-2.5 text-right font-mono text-xs" style="color:#6b6b60;">
+              <td class="px-3 py-1.5" style="color:#6b6b60;">{{ l.categoria || '—' }}</td>
+              <td class="px-3 py-1.5 text-right font-mono" style="color:#6b6b60;">
                 {{ l.precio ? fmtPeso(l.precio) : '—' }}
               </td>
-              <td class="px-4 py-2.5 text-right font-mono font-bold" style="color:#153f35;">
+              <td class="px-3 py-1.5 text-right font-mono font-bold" style="color:#153f35;">
                 {{ l.precio && l.superficie ? fmtPeso(l.precio * l.superficie) : '—' }}
               </td>
-              <td class="px-4 py-2.5 text-center">
+              <td class="px-3 py-1.5 text-center">
                 <span
-                  class="inline-block px-2.5 py-0.5 rounded-full text-xs font-bold"
+                  class="inline-block px-2 py-0.5 rounded-full font-bold"
                   :style="badgeStyle(l.estatus)"
                 >{{ l.estatus }}</span>
+              </td>
+              <td class="px-3 py-1.5 text-center">
+                <button
+                  v-if="l.estatus === 'APARTADO'"
+                  @click="liberarLote(l)"
+                  :disabled="liberando === `${l.manzana}-${l.lote}`"
+                  class="px-2.5 py-1 rounded-lg font-bold whitespace-nowrap"
+                  style="background:#dcfce7; color:#15803d;"
+                  :style="liberando === `${l.manzana}-${l.lote}` ? 'opacity:.5; cursor:wait;' : ''"
+                >
+                  {{ liberando === `${l.manzana}-${l.lote}` ? 'Liberando…' : 'Volver disponible' }}
+                </button>
+                <span v-else style="color:rgba(21,63,53,.25);">—</span>
               </td>
             </tr>
           </tbody>
           <!-- Totals row -->
           <tfoot>
             <tr style="background:rgba(21,63,53,.06); border-top:2px solid rgba(21,63,53,.15);">
-              <td colspan="2" class="px-4 py-2.5 text-xs font-bold" style="color:#153f35;">
+              <td colspan="2" class="px-3 py-1.5 font-bold" style="color:#153f35;">
                 {{ filasFiltradas.length }} lotes
               </td>
-              <td class="px-4 py-2.5 text-right font-mono text-xs font-bold" style="color:#153f35;">
+              <td class="px-3 py-1.5 text-right font-mono font-bold" style="color:#153f35;">
                 {{ fmtNum(totalSuperficie) }} m²
               </td>
               <td colspan="2"></td>
-              <td class="px-4 py-2.5 text-right font-mono text-xs font-bold" style="color:#153f35;">
+              <td class="px-3 py-1.5 text-right font-mono font-bold" style="color:#153f35;">
                 {{ fmtPeso(totalPrecio) }}
               </td>
-              <td></td>
+              <td colspan="2"></td>
             </tr>
           </tfoot>
         </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between gap-3 px-4 py-2.5 flex-wrap"
+           style="border-top:1px solid rgba(21,63,53,.1); background:#fff;">
+        <p class="text-xs" style="color:#6b6b60;">
+          Página {{ paginaActual }} de {{ totalPaginas }}
+        </p>
+        <div class="flex items-center gap-1">
+          <button
+            @click="paginaActual = 1"
+            :disabled="paginaActual === 1"
+            class="px-2 py-1 rounded-lg text-xs font-bold"
+            style="border:1px solid rgba(21,63,53,.15); color:#153f35;"
+            :style="paginaActual === 1 ? 'opacity:.35; cursor:not-allowed;' : ''"
+          >«</button>
+          <button
+            @click="paginaActual--"
+            :disabled="paginaActual === 1"
+            class="px-2 py-1 rounded-lg text-xs font-bold"
+            style="border:1px solid rgba(21,63,53,.15); color:#153f35;"
+            :style="paginaActual === 1 ? 'opacity:.35; cursor:not-allowed;' : ''"
+          >‹</button>
+          <span class="px-2 text-xs font-bold" style="color:#153f35;">{{ paginaActual }}</span>
+          <button
+            @click="paginaActual++"
+            :disabled="paginaActual === totalPaginas"
+            class="px-2 py-1 rounded-lg text-xs font-bold"
+            style="border:1px solid rgba(21,63,53,.15); color:#153f35;"
+            :style="paginaActual === totalPaginas ? 'opacity:.35; cursor:not-allowed;' : ''"
+          >›</button>
+          <button
+            @click="paginaActual = totalPaginas"
+            :disabled="paginaActual === totalPaginas"
+            class="px-2 py-1 rounded-lg text-xs font-bold"
+            style="border:1px solid rgba(21,63,53,.15); color:#153f35;"
+            :style="paginaActual === totalPaginas ? 'opacity:.35; cursor:not-allowed;' : ''"
+          >»</button>
+        </div>
       </div>
     </div>
 
@@ -159,15 +212,19 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useLotes } from '../composables/useLotes'
+import { ref, computed, watch } from 'vue'
+import { useLotes, setLoteEstatus, refreshReservations } from '../composables/useLotes'
 
 const { lotes, loading } = useLotes()
+const liberando = ref('')
 
 const filtroEstatus  = ref('')
 const filtroCategoria = ref('')
 const busqueda       = ref('')
 const orden          = ref('manzana')
+
+const paginaActual = ref(1)
+const porPagina     = 10
 
 const estatusList = [
   { key: 'DISPONIBLE', label: 'Disponible', dot: '#22c55e', bg: '#f0fdf4', color: '#15803d' },
@@ -236,6 +293,23 @@ const filasFiltradas = computed(() => {
   return copy
 })
 
+const totalPaginas = computed(() =>
+  Math.max(1, Math.ceil(filasFiltradas.value.length / porPagina))
+)
+
+const filasPaginadas = computed(() => {
+  const start = (paginaActual.value - 1) * porPagina
+  return filasFiltradas.value.slice(start, start + porPagina)
+})
+
+watch([filtroEstatus, filtroCategoria, busqueda, orden], () => {
+  paginaActual.value = 1
+})
+
+watch(totalPaginas, (t) => {
+  if (paginaActual.value > t) paginaActual.value = t
+})
+
 const totalSuperficie = computed(() =>
   filasFiltradas.value.reduce((s, l) => s + (l.superficie ?? 0), 0)
 )
@@ -258,6 +332,21 @@ function fmtNum(v) {
 }
 function fmtPeso(v) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(v ?? 0)
+}
+
+async function liberarLote(l) {
+  if (!confirm(`¿Seguro que quieres volver disponible el lote ${l.manzana}-${l.lote}?`)) return
+  const key = `${l.manzana}-${l.lote}`
+  liberando.value = key
+  try {
+    await setLoteEstatus(l.manzana, l.lote, 'DISPONIBLE')
+    await refreshReservations()
+  } catch (e) {
+    console.error('Error liberando lote:', e)
+    alert('No se pudo actualizar el lote. Intenta de nuevo.')
+  } finally {
+    liberando.value = ''
+  }
 }
 
 function exportarCSV() {
