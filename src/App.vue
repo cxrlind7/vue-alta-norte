@@ -57,6 +57,7 @@
     <!-- Tab content -->
     <AdminLotes v-if="adminTab === 'lotes'" />
     <AdminCotizaciones v-else-if="adminTab === 'cotizaciones'" />
+    <AdminPrecios v-else-if="adminTab === 'precios'" />
   </div>
 
   <!-- Main App -->
@@ -112,6 +113,7 @@ import { useI18n } from './composables/useI18n.js'
 import AdminLogin from './components/AdminLogin.vue'
 import AdminCotizaciones from './components/AdminCotizaciones.vue'
 import AdminLotes from './components/AdminLotes.vue'
+import AdminPrecios from './components/AdminPrecios.vue'
 import NavBar from './components/NavBar.vue'
 import HeroSection from './components/HeroSection.vue'
 import AboutSection from './components/AboutSection.vue'
@@ -136,6 +138,7 @@ const adminTab  = ref('lotes')
 const adminTabs = [
   { key: 'lotes',        label: 'Inventario Lotes' },
   { key: 'cotizaciones', label: 'Cotizaciones' },
+  { key: 'precios',      label: 'Precios' },
 ]
 
 const floatingWhatsapp = computed(() => {

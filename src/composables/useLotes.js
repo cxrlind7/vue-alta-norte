@@ -72,6 +72,26 @@ async function applySupabaseStatuses(data) {
   }
 }
 
+async function applyCategoryPrices(data) {
+  try {
+    const { data: rows, error } = await supabase
+      .from('precios')
+      .select('categoria, precio')
+    if (error) throw error
+    const priceByCategoria = {}
+    rows.forEach(({ categoria, precio }) => { priceByCategoria[categoria] = precio })
+    Object.values(data).forEach(lista => {
+      lista.forEach(l => {
+        if (l.categoria && priceByCategoria[l.categoria] !== undefined) {
+          l.precio = priceByCategoria[l.categoria]
+        }
+      })
+    })
+  } catch (e) {
+    console.warn('No se pudieron cargar precios por categoría, usando lotes.txt', e)
+  }
+}
+
 async function loadLotes() {
   try {
     const r    = await fetch('/lotes.txt')
@@ -80,6 +100,7 @@ async function loadLotes() {
 
     if (supabase) {
       await applySupabaseStatuses(data)
+      await applyCategoryPrices(data)
     } else {
       applyLocalReservations(data)
     }
@@ -110,10 +131,29 @@ export async function refreshReservations() {
   const data = parseLotes(rawText)
   if (supabase) {
     await applySupabaseStatuses(data)
+    await applyCategoryPrices(data)
   } else {
     applyLocalReservations(data)
   }
   lotes.value = data
+}
+
+export async function setCategoriaPrecio(categoria, precio) {
+  if (!supabase) throw new Error('Supabase no configurado')
+  const { data: existing, error: selError } = await supabase
+    .from('precios')
+    .select('id')
+    .eq('categoria', categoria)
+    .maybeSingle()
+  if (selError) throw selError
+
+  if (existing) {
+    const { error } = await supabase.from('precios').update({ precio }).eq('id', existing.id)
+    if (error) throw error
+  } else {
+    const { error } = await supabase.from('precios').insert({ categoria, precio })
+    if (error) throw error
+  }
 }
 
 export function useLotes() {

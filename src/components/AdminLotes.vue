@@ -135,17 +135,16 @@
                 >{{ l.estatus }}</span>
               </td>
               <td class="px-3 py-1.5 text-center">
-                <button
-                  v-if="l.estatus === 'APARTADO'"
-                  @click="liberarLote(l)"
-                  :disabled="liberando === `${l.manzana}-${l.lote}`"
-                  class="px-2.5 py-1 rounded-lg font-bold whitespace-nowrap"
-                  style="background:#dcfce7; color:#15803d;"
-                  :style="liberando === `${l.manzana}-${l.lote}` ? 'opacity:.5; cursor:wait;' : ''"
+                <select
+                  :value="l.estatus"
+                  :disabled="cambiando === `${l.manzana}-${l.lote}`"
+                  @change="cambiarEstatus(l, $event.target.value)"
+                  class="text-xs font-bold rounded-lg border px-1.5 py-1 focus:outline-none focus:ring-2"
+                  style="border-color:rgba(21,63,53,.2); color:#153f35;"
+                  :style="cambiando === `${l.manzana}-${l.lote}` ? 'opacity:.5; cursor:wait;' : ''"
                 >
-                  {{ liberando === `${l.manzana}-${l.lote}` ? 'Liberando…' : 'Volver disponible' }}
-                </button>
-                <span v-else style="color:rgba(21,63,53,.25);">—</span>
+                  <option v-for="s in estatusList" :key="s.key" :value="s.key">{{ s.label }}</option>
+                </select>
               </td>
             </tr>
           </tbody>
@@ -216,7 +215,7 @@ import { ref, computed, watch } from 'vue'
 import { useLotes, setLoteEstatus, refreshReservations } from '../composables/useLotes'
 
 const { lotes, loading } = useLotes()
-const liberando = ref('')
+const cambiando = ref('')
 
 const filtroEstatus  = ref('')
 const filtroCategoria = ref('')
@@ -334,18 +333,18 @@ function fmtPeso(v) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 }).format(v ?? 0)
 }
 
-async function liberarLote(l) {
-  if (!confirm(`¿Seguro que quieres volver disponible el lote ${l.manzana}-${l.lote}?`)) return
+async function cambiarEstatus(l, nuevoEstatus) {
+  if (nuevoEstatus === l.estatus) return
   const key = `${l.manzana}-${l.lote}`
-  liberando.value = key
+  cambiando.value = key
   try {
-    await setLoteEstatus(l.manzana, l.lote, 'DISPONIBLE')
+    await setLoteEstatus(l.manzana, l.lote, nuevoEstatus)
     await refreshReservations()
   } catch (e) {
-    console.error('Error liberando lote:', e)
+    console.error('Error actualizando estatus:', e)
     alert('No se pudo actualizar el lote. Intenta de nuevo.')
   } finally {
-    liberando.value = ''
+    cambiando.value = ''
   }
 }
 

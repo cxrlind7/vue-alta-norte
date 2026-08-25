@@ -5,11 +5,9 @@ import { useLotes, refreshReservations } from '../composables/useLotes.js'
 import { useAdminState } from '../composables/useAdminState.js'
 import CotizacionModal from './CotizacionModal.vue'
 
-const MAP_W = 1123
-const MAP_H = 793
-
-const alignX = ref(0)
-const alignY = ref(-30.4)
+const MAP_W = 842
+const MAP_H = 595
+const IMG_NATIVE_W = 4678
 
 const props = defineProps({
   selectedManzana: { type: String, default: null },
@@ -129,7 +127,7 @@ function applyStatusColors() {
     const col = statusColor(lotData.estatus)
     shape.style.fill        = col.fill
     shape.style.stroke      = col.stroke
-    shape.style.strokeWidth = '1.5'
+    shape.style.strokeWidth = '0.7'
     shape.style.fillOpacity = col.opacity
   })
 }
@@ -168,7 +166,7 @@ onMounted(async () => {
   fitPanY  = (containerH - MAP_H * fitScale) / 2
 
   panzoomInstance = Panzoom(panzoomRef.value, {
-    maxScale  : 8,
+    maxScale  : IMG_NATIVE_W / MAP_W,
     minScale  : fitScale * 0.8,
     startScale: fitScale,
     startX    : fitPanX,
@@ -352,23 +350,20 @@ function fmtArea(v) {
     <div
       ref="panzoomRef"
       class="absolute top-0 left-0"
-      style="width:1123px;height:793px;transform-origin:0 0;will-change:transform;"
+      style="width:842px;height:595px;transform-origin:0 0;will-change:transform;"
     >
-      <div class="absolute inset-0 flex items-center justify-center">
-        <div class="relative" style="width:793px;height:1123px;transform:rotate(-90deg);">
-          <img
-            src="../../public/svg/lotificacion.jpg"
-            class="absolute inset-0 w-full h-full pointer-events-none"
-            alt="Plano Lotificación"
-          />
-          <div
-            ref="svgContainerRef"
-            class="interactive-svg-container absolute inset-0 w-full h-full z-10"
-            :style="{ transform: `translate(${alignX}px, ${alignY}px)` }"
-            v-html="svgContent"
-            @click="handleClick"
-          ></div>
-        </div>
+      <div class="relative w-full h-full">
+        <img
+          src="../../public/svg/plano.png"
+          class="absolute inset-0 w-full h-full pointer-events-none"
+          alt="Plano Lotificación"
+        />
+        <div
+          ref="svgContainerRef"
+          class="interactive-svg-container absolute inset-0 w-full h-full z-10"
+          v-html="svgContent"
+          @click="handleClick"
+        ></div>
       </div>
     </div>
 
