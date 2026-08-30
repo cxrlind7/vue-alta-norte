@@ -20,7 +20,25 @@
       "Bash(git checkout *)",
       "Bash(git tag *)",
       "WebFetch(domain:api.anthropic.com)",
-      "Bash(grep -o \"font-family:[^;]*\\\\|color:#[a-fA-F0-9]\\\\{3,6\\\\}\\\\|background:[^;]*\\\\|font-size:[^;]*\" \"C:/Users/CarlosOmarAldabaEstr/Downloads/Reserva Alta Norte.html\")"
+      "Bash(grep -o \"font-family:[^;]*\\\\|color:#[a-fA-F0-9]\\\\{3,6\\\\}\\\\|background:[^;]*\\\\|font-size:[^;]*\" \"C:/Users/CarlosOmarAldabaEstr/Downloads/Reserva Alta Norte.html\")",
+      "Bash(python3 -c \"import json; d=json.load\\(open\\('/c/Users/CarlosOmarAldabaEstr/Downloads/alta-norte-lots.json'\\)\\); print\\(d['total'], len\\(d['lots']\\)\\)\")",
+      "Bash(node -e \"const d=require\\('/c/Users/CarlosOmarAldabaEstr/Downloads/alta-norte-lots.json'\\); console.log\\(d.total, d.lots.length\\)\")",
+      "Bash(node *)",
+      "Bash(awk -F'\\\\t' 'NR>1{print $5\"\\\\t\"$6}' public/lotes.txt)",
+      "Bash(awk -F'\\\\t' 'NR>1{c[$4]++} END{for\\(k in c\\) print k, c[k]}' public/lotes.txt)",
+      "Read(//tmp/**)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5183/)",
+      "Bash(curl -s http://localhost:5183/lotes.txt)",
+      "Bash(taskkill //F //IM node.exe //FI \"WINDOWTITLE eq vite*\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}, size %{size_download}\\\\n\" \"https://altanorte-api.overclic.com/map/public/lots\")",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}, size %{size_download}, type %{content_type}\\\\n\" \"https://altanorte.overclic.com/plano/plano.png\")",
+      "Bash(curl -s 'https://lnzkpocjdilwprlzqwlk.supabase.co/rest/v1/lot_statuses?select=manzana,lote_num,estatus&limit=5' -H 'apikey: sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Authorization: Bearer sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-')",
+      "Bash(curl -s https://lnzkpocjdilwprlzqwlk.supabase.co/rest/v1/lot_statuses?select=estatus -H 'apikey: sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Authorization: Bearer sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Prefer: count=exact' -D - -o /dev/null)",
+      "Bash(curl -sS -i 'https://lnzkpocjdilwprlzqwlk.supabase.co/rest/v1/lot_statuses?select=manzana,lote_num,estatus&limit=5' -H 'apikey: sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Authorization: Bearer sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-')",
+      "Bash(nslookup lnzkpocjdilwprlzqwlk.supabase.co)",
+      "Bash(curl -sS -i --max-time 15 'https://lnzkpocjdilwprlzqwlk.supabase.co/rest/v1/lot_statuses?select=manzana,lote_num,estatus&limit=5' -H 'apikey: sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Authorization: Bearer sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-')",
+      "Bash(curl -sS -i --max-time 15 'https://lnzkpocjdilwprlzqwlk.supabase.co/rest/v1/lot_statuses?select=manzana,lote_num,estatus&limit=3' -H 'apikey: sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Authorization: Bearer sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-')",
+      "Bash(curl *)"
     ]
   }
 }

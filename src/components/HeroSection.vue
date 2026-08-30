@@ -31,10 +31,20 @@
         class="group inline-flex items-center gap-3 px-10 py-4 rounded-full font-bold text-sm
                tracking-widest uppercase border-2 border-white/35 text-white
                hover:border-white hover:bg-white/10 transition-all duration-300 hover:scale-105"
-        @click="scrollTo('#contacto')"
+        @click="scrollTo('#planos')"
       >
         {{ t.hero.ctaLots }}
       </button>
+      <a
+        href="https://altanorte.overclic.com"
+        target="_blank"
+        rel="noopener"
+        class="group inline-flex items-center gap-3 px-10 py-4 rounded-full font-bold text-sm
+               tracking-widest uppercase border-2 border-white/35 text-white
+               hover:border-white hover:bg-white/10 transition-all duration-300 hover:scale-105"
+      >
+        {{ t.hero.ctaPortal }}
+      </a>
     </div>
 
     <!-- Scroll indicator -->
