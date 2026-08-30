@@ -30,6 +30,7 @@ const translations = {
       subtitle: 'Ski, Camping & Resort en la Sierra Madre',
       cta: 'Conoce el Proyecto',
       ctaLots: 'Ver Lotes',
+      ctaPortal: 'Portal de Reservas',
     },
 
     about: {
@@ -370,6 +371,7 @@ const translations = {
       subtitle: 'Ski, Camping & Resort in the Sierra Madre',
       cta: 'Discover the Project',
       ctaLots: 'View Lots',
+      ctaPortal: 'Reservations Portal',
     },
 
     about: {
