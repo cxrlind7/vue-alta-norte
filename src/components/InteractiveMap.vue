@@ -5,8 +5,20 @@ import { useLotes, refreshReservations } from '../composables/useLotes.js'
 import { useAdminState } from '../composables/useAdminState.js'
 import CotizacionModal from './CotizacionModal.vue'
 
-const MAP_W = 842
-const MAP_H = 595
+// Base box matches the PNG's native resolution exactly. The <img> is laid
+// out at this CSS size (w-full/h-full of this box), so the browser decodes
+// the 4678x3306 source at ~1:1 here and panzoom's transform only ever
+// scales it DOWN to fit (fitScale < 1) or back up to at most this native
+// size (maxScale = IMG_NATIVE_W / MAP_W = 1) — never beyond, so the raster
+// is never upsampled/blurred. (An earlier attempt used a smaller box
+// (1684x1190) to reduce DOM size for perf, but that meant the browser
+// decoded the image at 1684px and then upscaled that already-downsampled
+// bitmap up to 2.78x via the zoom transform, which is what was blurry.)
+// The SVG overlay (viewBox 0 0 842 595) is vector so it's unaffected by
+// this box's size; its aspect ratio matches the image's exactly
+// (842/595 === 4678/3306), so nothing gets distorted.
+const MAP_W = 4678
+const MAP_H = 3306
 const IMG_NATIVE_W = 4678
 
 const props = defineProps({
@@ -129,6 +141,9 @@ function applyStatusColors() {
     shape.style.stroke      = col.stroke
     shape.style.strokeWidth = '0.7'
     shape.style.fillOpacity = col.opacity
+
+    const label = svgContainerRef.value.querySelector(`#label${manzanaKey}-${loteNum}`)
+    if (label) label.style.fill = col.text
   })
 }
 
@@ -162,8 +177,18 @@ onMounted(async () => {
   const containerH = containerRef.value?.clientHeight || window.innerHeight
 
   fitScale = Math.min(containerW / MAP_W, containerH / MAP_H)
-  fitPanX  = (containerW - MAP_W * fitScale) / 2
-  fitPanY  = (containerH - MAP_H * fitScale) / 2
+  // Panzoom forces transform-origin to 50% 50% on non-SVG elements (it sets
+  // this itself, overriding any CSS), and its focal-point math for
+  // wheel-zoom assumes that origin too. So the pan math here must account
+  // for a center-anchored scale, not a top-left-anchored one: translating
+  // by T with transform `scale(S) translate(T)` around a center origin O
+  // puts the box's own top-left corner at `O*(1-S) + S*T`. Solving that for
+  // T so the box lands centered in the container collapses to this (the
+  // O*(1-S) terms cancel out) — do not "simplify" it back to the naive
+  // `(container - map*scale)/2` form, that assumes a 0,0 origin and drifts
+  // more the further fitScale is from 1.
+  fitPanX  = (containerW - MAP_W) / (2 * fitScale)
+  fitPanY  = (containerH - MAP_H) / (2 * fitScale)
 
   panzoomInstance = Panzoom(panzoomRef.value, {
     maxScale  : IMG_NATIVE_W / MAP_W,
@@ -350,7 +375,7 @@ function fmtArea(v) {
     <div
       ref="panzoomRef"
       class="absolute top-0 left-0"
-      style="width:842px;height:595px;transform-origin:0 0;will-change:transform;"
+      :style="{ width: MAP_W + 'px', height: MAP_H + 'px', willChange: 'transform' }"
     >
       <div class="relative w-full h-full">
         <img
@@ -376,10 +401,10 @@ function fmtArea(v) {
           :style="{ left: calloutStyle.left, top: calloutStyle.top }"
         >
           <div class="bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-900 to-slate-900 px-4 py-3 flex items-start justify-between select-none"
-              style="cursor:grab;" @mousedown.stop="startDrag">
+            <div class="px-4 py-3 flex items-start justify-between select-none"
+              style="cursor:grab; background:linear-gradient(to right, #153f35, #0d2620);" @mousedown.stop="startDrag">
               <div>
-                <p class="text-blue-300 text-[10px] font-bold uppercase tracking-widest">Lote Seleccionado</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest" style="color:#aebc82;">Lote Seleccionado</p>
                 <p class="text-white text-lg font-extrabold leading-tight">
                   SEC {{ hoveredLote.manzana }} · Lote {{ hoveredLote.lote.lote }}
                 </p>
@@ -394,15 +419,15 @@ function fmtArea(v) {
             <div class="px-4 py-3 space-y-1.5 text-sm">
               <div class="flex justify-between">
                 <span class="text-slate-500">Superficie</span>
-                <span class="font-bold text-blue-900">{{ fmtArea(hoveredLote.lote.superficie) }} m²</span>
+                <span class="font-bold text-[#153f35]">{{ fmtArea(hoveredLote.lote.superficie) }} m²</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-500">Precio / m²</span>
-                <span class="font-bold text-blue-900">{{ fmt(hoveredLote.lote.precio) }}</span>
+                <span class="font-bold text-[#153f35]">{{ fmt(hoveredLote.lote.precio) }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-slate-500">Total estimado</span>
-                <span class="font-black text-blue-900">{{ fmt(hoveredLote.lote.superficie * hoveredLote.lote.precio) }}</span>
+                <span class="font-black text-[#153f35]">{{ fmt(hoveredLote.lote.superficie * hoveredLote.lote.precio) }}</span>
               </div>
               <div class="flex justify-between items-center pt-0.5">
                 <span class="text-slate-500">Estatus</span>
