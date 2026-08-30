@@ -508,7 +508,7 @@ p.lead-dark { color:rgba(17,26,16,.65); }
       </div>
       <div class="hs-ctas">
         <a href="#nosotros" class="hs-btn-primary">Conoce el proyecto →</a>
-        <a href="#planos" class="hs-btn-secondary">Ver lotes</a>
+        <a href="https://altanorte.overclic.com" class="hs-btn-secondary">Ver lotes</a>
       </div>
     </div>
   </div>

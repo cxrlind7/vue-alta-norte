@@ -122,6 +122,7 @@ const totalPrice = computed(() => {
       </div>
       <h2 class="text-xl font-bold text-primary">Selecciona una Sección</h2>
       <p class="text-neutral-500 text-sm max-w-[200px]">Da clic sobre el plano interactivo para ver los lotes disponibles.</p>
+      <p class="text-neutral-400 text-xs max-w-[220px]">Algunas zonas del plano aún no están habilitadas para selección. Si te interesan, contacta a un agente de ventas.</p>
     </div>
 
     <!-- Section selected -->

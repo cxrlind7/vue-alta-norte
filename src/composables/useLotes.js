@@ -37,20 +37,20 @@ function applyLocalReservations(data) {
 
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i)
-    if (!key?.startsWith('apartado_')) continue
+    if (!key?.startsWith('override_')) continue
     const raw = localStorage.getItem(key)
     if (!raw) continue
     try {
-      const { expiry } = JSON.parse(raw)
-      if (now > expiry) { toDelete.push(key); continue }
-      const withoutPrefix  = key.slice('apartado_'.length)
+      const { estatus, expiry } = JSON.parse(raw)
+      if (expiry && now > expiry) { toDelete.push(key); continue }
+      const withoutPrefix  = key.slice('override_'.length)
       const lastUnderscore = withoutPrefix.lastIndexOf('_')
       if (lastUnderscore < 0) continue
       const manzana = withoutPrefix.slice(0, lastUnderscore)
       const loteNum = parseInt(withoutPrefix.slice(lastUnderscore + 1))
       if (!manzana || isNaN(loteNum)) continue
       const found = data[manzana]?.find(l => l.lote === loteNum)
-      if (found) found.estatus = 'APARTADO'
+      if (found) found.estatus = estatus
     } catch (_) {}
   }
   toDelete.forEach(k => localStorage.removeItem(k))
@@ -72,6 +72,26 @@ async function applySupabaseStatuses(data) {
   }
 }
 
+async function applyCategoryPrices(data) {
+  try {
+    const { data: rows, error } = await supabase
+      .from('precios')
+      .select('categoria, precio')
+    if (error) throw error
+    const priceByCategoria = {}
+    rows.forEach(({ categoria, precio }) => { priceByCategoria[categoria] = precio })
+    Object.values(data).forEach(lista => {
+      lista.forEach(l => {
+        if (l.categoria && priceByCategoria[l.categoria] !== undefined) {
+          l.precio = priceByCategoria[l.categoria]
+        }
+      })
+    })
+  } catch (e) {
+    console.warn('No se pudieron cargar precios por categoría, usando lotes.txt', e)
+  }
+}
+
 async function loadLotes() {
   try {
     const r    = await fetch('/lotes.txt')
@@ -80,6 +100,7 @@ async function loadLotes() {
 
     if (supabase) {
       await applySupabaseStatuses(data)
+      await applyCategoryPrices(data)
     } else {
       applyLocalReservations(data)
     }
@@ -99,9 +120,9 @@ export async function setLoteEstatus(manzana, loteNum, estatus) {
       .upsert({ manzana, lote_num: loteNum, estatus }, { onConflict: 'manzana,lote_num' })
     if (error) throw error
   } else {
-    const key    = `apartado_${manzana}_${loteNum}`
-    const expiry = Date.now() + 2 * 24 * 60 * 60 * 1000
-    localStorage.setItem(key, JSON.stringify({ expiry }))
+    const key     = `override_${manzana}_${loteNum}`
+    const expiry  = estatus === 'APARTADO' ? Date.now() + 2 * 24 * 60 * 60 * 1000 : null
+    localStorage.setItem(key, JSON.stringify({ estatus, expiry }))
   }
 }
 
@@ -110,10 +131,29 @@ export async function refreshReservations() {
   const data = parseLotes(rawText)
   if (supabase) {
     await applySupabaseStatuses(data)
+    await applyCategoryPrices(data)
   } else {
     applyLocalReservations(data)
   }
   lotes.value = data
+}
+
+export async function setCategoriaPrecio(categoria, precio) {
+  if (!supabase) throw new Error('Supabase no configurado')
+  const { data: existing, error: selError } = await supabase
+    .from('precios')
+    .select('id')
+    .eq('categoria', categoria)
+    .maybeSingle()
+  if (selError) throw selError
+
+  if (existing) {
+    const { error } = await supabase.from('precios').update({ precio }).eq('id', existing.id)
+    if (error) throw error
+  } else {
+    const { error } = await supabase.from('precios').insert({ categoria, precio })
+    if (error) throw error
+  }
 }
 
 export function useLotes() {
