@@ -235,7 +235,7 @@ const rooms = [
   { name: 'Vista 4',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama6_001.webp' },
   { name: 'Vista 5',         area: 'Casa Club',      category: 'Áreas Sociales',        image: '/images/tour/casa club/Panorama7.webp' },
   { name: 'Vista 1',         area: 'Salón',          category: 'Áreas Sociales',        image: '/images/tour/salon/Panorama4.webp' },
-  { name: 'Vista 2',         area: 'Salón',          category: 'Áreas Sociales',        image: '/images/tour/salon/Panorama5.webp' },
+  { name: 'Vista 2',         area: 'Salón',          category: 'Áreas Sociales',        image: '/images/tour/salon/Panorama5-tour.webp' },
   { name: 'Vista 1',         area: 'Palapa',         category: 'Áreas Sociales',        image: '/images/tour/palapa/Panorama5.webp' },
   { name: 'Vista 1',         area: 'Hostal',         category: 'Áreas Sociales',        image: '/images/tour/hostal/Panorama1.webp' },
   { name: 'Vista 2',         area: 'Hostal',         category: 'Áreas Sociales',        image: '/images/tour/hostal/Panorama2.webp' },

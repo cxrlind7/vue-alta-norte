@@ -145,7 +145,7 @@ const floatingWhatsapp = computed(() => {
   const msg = lang.value === 'en'
     ? "Hello%2C%20I%27m%20interested%20in%20learning%20more%20about%20Alta%20Norte"
     : 'Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Alta%20Norte'
-  return `https://wa.me/526181090020?text=${msg}`
+  return `https://wa.me/526188063886?text=${msg}`
 })
 
 async function handleLogout() {

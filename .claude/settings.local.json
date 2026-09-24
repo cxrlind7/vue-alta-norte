@@ -38,7 +38,16 @@
       "Bash(nslookup lnzkpocjdilwprlzqwlk.supabase.co)",
       "Bash(curl -sS -i --max-time 15 'https://lnzkpocjdilwprlzqwlk.supabase.co/rest/v1/lot_statuses?select=manzana,lote_num,estatus&limit=5' -H 'apikey: sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Authorization: Bearer sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-')",
       "Bash(curl -sS -i --max-time 15 'https://lnzkpocjdilwprlzqwlk.supabase.co/rest/v1/lot_statuses?select=manzana,lote_num,estatus&limit=3' -H 'apikey: sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-' -H 'Authorization: Bearer sb_publishable_iAQp8hp0Sp02vTtHTv-XdA_czonxhN-')",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(identify public/svg/plano.png)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Read(//c/Users/CarlosOmarAldabaEstr/Downloads/**)",
+      "Bash(pkill -f \"vite --port 5183\")",
+      "Bash(python3 -c \"import PIL; print\\('PIL ok'\\)\")",
+      "Bash(python -c \"import PIL; print\\('PIL ok'\\)\")",
+      "Bash(python -c ' *)"
     ]
   }
 }

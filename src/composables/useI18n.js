@@ -30,7 +30,7 @@ const translations = {
       subtitle: 'Ski, Camping & Resort en la Sierra Madre',
       cta: 'Conoce el Proyecto',
       ctaLots: 'Ver Lotes',
-      ctaPortal: 'Portal de Reservas',
+      ctaPortal: 'Agenda tu recorrido',
     },
 
     about: {
@@ -104,7 +104,7 @@ const translations = {
       tag: 'Lo que puedes hacer',
       heading1: 'Aventura, naturaleza',
       heading2: 'y descanso total.',
-      lead: '16 actividades diseñadas para el disfrute en cada estación del año.',
+      lead: '15 actividades diseñadas para el disfrute en cada estación del año.',
       filters: [
         { key: 'all',        label: 'Todas'     },
         { key: 'aventura',   label: 'Aventura'  },
@@ -113,7 +113,7 @@ const translations = {
         { key: 'invierno',   label: 'Invierno'  },
       ],
       items: [
-        { icon: '⛷️',  cat: ['invierno','aventura'],   catLabel: 'Invierno',   name: 'Ski & Snowboard' },
+        { icon: '⛷️',  cat: ['invierno','aventura'],   catLabel: 'Invierno',   name: 'Ski' },
         { icon: '🏔️', cat: ['aventura','naturaleza'], catLabel: 'Aventura',   name: 'Senderismo de montaña' },
         { icon: '🎣',  cat: ['naturaleza','relax'],    catLabel: 'Naturaleza', name: 'Pesca deportiva' },
         { icon: '🚴',  cat: ['aventura'],              catLabel: 'Aventura',   name: 'Ciclismo de montaña' },
@@ -127,7 +127,6 @@ const translations = {
         { icon: '🍽️', cat: ['relax'],                 catLabel: 'Relax',      name: 'Restaurante sierra' },
         { icon: '🏊',  cat: ['relax'],                 catLabel: 'Relax',      name: 'Alberca panorámica' },
         { icon: '🌿',  cat: ['naturaleza','relax'],    catLabel: 'Naturaleza', name: 'Trail running' },
-        { icon: '🎿',  cat: ['invierno','aventura'],   catLabel: 'Invierno',   name: 'Clases de esquí' },
         { icon: '🎪',  cat: ['aventura','naturaleza'], catLabel: 'Familia',    name: 'Áreas familiares' },
       ],
     },
@@ -172,8 +171,8 @@ const translations = {
         },
         invierno: {
           temp: '-2°C', range: '-8°C — 10°C · Dic – Feb',
-          desc: 'Temporada de ski. La única pista de la región se activa con nieve real.',
-          tags: ['❄️ Nieve', '⛷️ Pistas activas', '🏔️ Vista nevada'],
+          desc: 'Temporada de ski. La única pista de esquí de la región.',
+          tags: ['⛷️ Pistas activas'],
           gear: [
             { emoji: '🧥', title: 'Ropa térmica completa', desc: 'Camiseta, pantalón y calcetines térmicos.' },
             { emoji: '🎿', title: 'Equipo de ski',         desc: 'Trae el tuyo o renta en las instalaciones.' },
@@ -289,11 +288,11 @@ const translations = {
       lead: 'Pasa el cursor sobre cada tarjeta para ver el detalle.',
       cards: [
         { icon: '📡', title: 'Conectividad', backTitle: 'Sin señal, con WiFi',
-          backText: 'WiFi de alta velocidad en todas las áreas. WhatsApp y videollamadas sin problema.',
+          backText: 'WiFi de alta velocidad en todas las áreas. El punto de acceso puede cambiar durante el recorrido, pero WhatsApp y videollamadas funcionan sin problema.',
           chips: ['WiFi ✓', 'Sin 4G'] },
-        { icon: '💳', title: 'Pagos', backTitle: 'Efectivo + tarjeta',
-          backText: 'Visa, Mastercard, Amex. USD y MXN en efectivo. Transferencia para lotes.',
-          chips: ['Visa ✓', 'USD/MXN'] },
+        { icon: '💳', title: 'Pagos', backTitle: 'Solo transferencia',
+          backText: 'Transferencia bancaria en USD y MXN. Único método de pago para la reserva de lotes.',
+          chips: ['Transferencia ✓', 'USD/MXN'] },
         { icon: '🌡️', title: 'Altitud', backTitle: '2,400 msnm',
           backText: 'Posible mareo el 1er día. Hidratarse bien y descansar las primeras horas.',
           chips: ['Hidrátate', 'Descanso'] },
@@ -321,16 +320,16 @@ const translations = {
       subtitle: 'Conéctate con nuestro equipo de ventas para conocer más sobre la comunidad.',
       phone: 'Teléfono', email: 'Email', whatsapp: 'WhatsApp', writeUs: 'Escríbenos',
       salesOffice: 'Oficina de Ventas',
-      addressLine1: 'Av. 20 de Nov #403 Ote, Zona Centro',
-      addressLine2: 'Durango, Dgo. México',
+      addressLine1: 'Heroico Colegio Militar 103, Local D10',
+      addressLine2: 'Col. Nueva Vizcaya, C.P. 34080, Durango, Dgo.',
     },
 
     footer: {
       tagline: 'Un estilo de vida extraordinario en la Sierra Madre. Ski, Camping y Resort en un desarrollo inmobiliario único.',
       nav: 'Navegación', contact: 'Contacto', phone: 'Teléfono', email: 'Email',
       office: 'Oficina de Ventas',
-      addressLine1: 'Av. 20 de Nov #403 Ote, Zona Centro',
-      addressLine2: 'Durango, Dgo. México',
+      addressLine1: 'Heroico Colegio Militar 103, Local D10',
+      addressLine2: 'Col. Nueva Vizcaya, C.P. 34080, Durango, Dgo.',
       rights: '© 2026 Reserva Alta Norte. Todos los derechos reservados.',
       terms: 'Términos', privacy: 'Privacidad',
       links: [
@@ -371,7 +370,7 @@ const translations = {
       subtitle: 'Ski, Camping & Resort in the Sierra Madre',
       cta: 'Discover the Project',
       ctaLots: 'View Lots',
-      ctaPortal: 'Reservations Portal',
+      ctaPortal: 'Book Your Tour',
     },
 
     about: {
@@ -445,7 +444,7 @@ const translations = {
       tag: 'What you can do',
       heading1: 'Adventure, nature',
       heading2: 'and total rest.',
-      lead: '16 activities designed for enjoyment in every season of the year.',
+      lead: '15 activities designed for enjoyment in every season of the year.',
       filters: [
         { key: 'all',        label: 'All'       },
         { key: 'aventura',   label: 'Adventure' },
@@ -454,7 +453,7 @@ const translations = {
         { key: 'invierno',   label: 'Winter'    },
       ],
       items: [
-        { icon: '⛷️',  cat: ['invierno','aventura'],   catLabel: 'Winter',    name: 'Ski & Snowboard' },
+        { icon: '⛷️',  cat: ['invierno','aventura'],   catLabel: 'Winter',    name: 'Ski' },
         { icon: '🏔️', cat: ['aventura','naturaleza'], catLabel: 'Adventure', name: 'Mountain Hiking' },
         { icon: '🎣',  cat: ['naturaleza','relax'],    catLabel: 'Nature',    name: 'Sport Fishing' },
         { icon: '🚴',  cat: ['aventura'],              catLabel: 'Adventure', name: 'Mountain Biking' },
@@ -468,7 +467,6 @@ const translations = {
         { icon: '🍽️', cat: ['relax'],                 catLabel: 'Relax',     name: 'Mountain Restaurant' },
         { icon: '🏊',  cat: ['relax'],                 catLabel: 'Relax',     name: 'Panoramic Pool' },
         { icon: '🌿',  cat: ['naturaleza','relax'],    catLabel: 'Nature',    name: 'Trail Running' },
-        { icon: '🎿',  cat: ['invierno','aventura'],   catLabel: 'Winter',    name: 'Ski Lessons' },
         { icon: '🎪',  cat: ['aventura','naturaleza'], catLabel: 'Family',    name: 'Family Areas' },
       ],
     },
@@ -513,8 +511,8 @@ const translations = {
         },
         invierno: {
           temp: '-2°C', range: '-8°C — 10°C · Dec – Feb',
-          desc: 'Ski season. The only slope in the region activates with real snow.',
-          tags: ['❄️ Snow', '⛷️ Active slopes', '🏔️ Snow views'],
+          desc: 'Ski season. The only ski slope in the region.',
+          tags: ['⛷️ Active slopes'],
           gear: [
             { emoji: '🧥', title: 'Full thermal gear', desc: 'Thermal shirt, pants and socks.' },
             { emoji: '🎿', title: 'Ski equipment',      desc: 'Bring your own or rent at the facilities.' },
@@ -630,11 +628,11 @@ const translations = {
       lead: 'Hover over each card to see the details.',
       cards: [
         { icon: '📡', title: 'Connectivity', backTitle: 'No signal, but WiFi',
-          backText: 'High-speed WiFi in all areas. WhatsApp and video calls work fine.',
+          backText: 'High-speed WiFi in all areas. The access point may change during the tour, but WhatsApp and video calls work fine.',
           chips: ['WiFi ✓', 'No 4G'] },
-        { icon: '💳', title: 'Payments', backTitle: 'Cash + card',
-          backText: 'Visa, Mastercard, Amex. USD and MXN in cash. Wire transfer for lots.',
-          chips: ['Visa ✓', 'USD/MXN'] },
+        { icon: '💳', title: 'Payments', backTitle: 'Wire transfer only',
+          backText: 'Bank wire transfer in USD and MXN. The only payment method accepted for lot reservations.',
+          chips: ['Wire transfer ✓', 'USD/MXN'] },
         { icon: '🌡️', title: 'Altitude', backTitle: '2,400 m asl',
           backText: 'Possible altitude sickness on the first day. Stay hydrated and rest during the first hours.',
           chips: ['Stay hydrated', 'Rest'] },
@@ -662,16 +660,16 @@ const translations = {
       subtitle: 'Connect with our sales team to learn more about the community.',
       phone: 'Phone', email: 'Email', whatsapp: 'WhatsApp', writeUs: 'Write to Us',
       salesOffice: 'Sales Office',
-      addressLine1: 'Av. 20 de Nov #403 Ote, Downtown',
-      addressLine2: 'Durango, Dgo. Mexico',
+      addressLine1: 'Heroico Colegio Militar 103, Suite D10',
+      addressLine2: 'Col. Nueva Vizcaya, 34080, Durango, Dgo. Mexico',
     },
 
     footer: {
       tagline: 'An extraordinary lifestyle in the Sierra Madre. Ski, Camping and Resort in a unique real estate development.',
       nav: 'Navigation', contact: 'Contact', phone: 'Phone', email: 'Email',
       office: 'Sales Office',
-      addressLine1: 'Av. 20 de Nov #403 Ote, Downtown',
-      addressLine2: 'Durango, Dgo. Mexico',
+      addressLine1: 'Heroico Colegio Militar 103, Suite D10',
+      addressLine2: 'Col. Nueva Vizcaya, 34080, Durango, Dgo. Mexico',
       rights: '© 2026 Reserva Alta Norte. All rights reserved.',
       terms: 'Terms', privacy: 'Privacy',
       links: [
