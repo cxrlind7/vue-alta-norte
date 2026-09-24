@@ -40,7 +40,7 @@
       <div class="grid sm:grid-cols-3 border-t border-b" style="border-color:rgba(174,188,130,0.12);" data-animate-delay="200">
 
         <!-- Phone -->
-        <a href="tel:+526181090020"
+        <a href="tel:+526188063886"
            class="group flex flex-col items-center justify-center gap-5 py-16 px-8
                   border-r transition-all duration-300 hover:bg-white/[0.03]"
            style="border-color:rgba(174,188,130,0.12);">
@@ -57,14 +57,14 @@
               {{ t.contact.phone }}
             </p>
             <p class="text-xl font-bold text-white group-hover:text-[#aebc82] transition-colors duration-300">
-              +52 618 109 0020
+              +52 618 806 3886
             </p>
           </div>
           <div class="w-0 h-0.5 group-hover:w-12 transition-all duration-500 rounded-full" style="background:#aebc82;"></div>
         </a>
 
         <!-- Email -->
-        <a href="mailto:info@altanorte.mx"
+        <a href="mailto:reservaaltanorte@gmail.com"
            class="group flex flex-col items-center justify-center gap-5 py-16 px-8
                   border-r transition-all duration-300 hover:bg-white/[0.03]"
            style="border-color:rgba(174,188,130,0.12);">
@@ -81,7 +81,7 @@
               {{ t.contact.email }}
             </p>
             <p class="text-xl font-bold text-white group-hover:text-[#aebc82] transition-colors duration-300">
-              info@altanorte.mx
+              reservaaltanorte@gmail.com
             </p>
           </div>
           <div class="w-0 h-0.5 group-hover:w-12 transition-all duration-500 rounded-full" style="background:#aebc82;"></div>
@@ -143,6 +143,6 @@ const whatsappHref = computed(() => {
   const msg = lang.value === 'en'
     ? 'Hello%2C%20I%27m%20interested%20in%20learning%20more%20about%20Alta%20Norte'
     : 'Hola%2C%20me%20interesa%20conocer%20m%C3%A1s%20sobre%20Alta%20Norte'
-  return `https://wa.me/526181090020?text=${msg}`
+  return `https://wa.me/526188063886?text=${msg}`
 })
 </script>
