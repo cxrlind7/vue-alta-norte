@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useLotes } from '../composables/useLotes.js'
+import { useLotes, estatusVisible } from '../composables/useLotes.js'
+import { useAdminState } from '../composables/useAdminState.js'
 
 const props = defineProps({
     selectedManzana: { type: String, default: null },
@@ -11,6 +12,7 @@ const props = defineProps({
 const emit = defineEmits(['select-lot'])
 
 const { lotes, loading } = useLotes()
+const { isAdmin } = useAdminState()
 
 const hoveredLote = ref(null)
 
@@ -22,9 +24,14 @@ const STATUS_COLOR = {
     RESERVADO: { fill: '#94a3b8', stroke: '#64748b', text: '#1e293b' },
     VENDIDO: { fill: '#ef4444', stroke: '#dc2626', text: '#7f1d1d' },
 }
+const PUBLIC_STATUS_COLOR = {
+    DISPONIBLE: STATUS_COLOR.DISPONIBLE,
+    'NO DISPONIBLE': STATUS_COLOR.VENDIDO,
+}
+const legendColors = computed(() => isAdmin.value ? STATUS_COLOR : PUBLIC_STATUS_COLOR)
 
 function statusColor(estatus) {
-    return STATUS_COLOR[estatus] || STATUS_COLOR.RESERVADO
+    return legendColors.value[estatusVisible(estatus, isAdmin.value)] || STATUS_COLOR.RESERVADO
 }
 
 const selectedKey = computed(() => {
@@ -113,7 +120,7 @@ function fmtArea(v) {
     <div class="w-full h-full overflow-auto bg-slate-900 p-4 relative" @click.self="clearHover">
         <!-- Legend -->
         <div class="flex flex-wrap gap-4 mb-4 px-2">
-            <div v-for="(colors, status) in STATUS_COLOR" :key="status" class="flex items-center gap-1.5">
+            <div v-for="(colors, status) in legendColors" :key="status" class="flex items-center gap-1.5">
                 <div class="w-4 h-3 rounded-sm border"
                     :style="`background:${colors.fill};border-color:${colors.stroke}`"></div>
                 <span class="text-xs text-slate-300 font-semibold">{{ status }}</span>

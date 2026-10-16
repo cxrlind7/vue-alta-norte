@@ -39,7 +39,7 @@
         class="group inline-flex items-center gap-3 px-10 py-4 rounded-full font-bold text-sm
                tracking-widest uppercase border-2 border-white/35 text-white
                hover:border-white hover:bg-white/10 transition-all duration-300 hover:scale-105"
-        @click="scrollTo('#recorrido-nuevo')"
+        @click="openVisitas"
       >
         {{ t.hero.ctaPortal }}
       </button>
@@ -72,6 +72,10 @@ const parallaxBg  = ref(null)
 function scrollTo(selector) {
   const el = document.querySelector(selector)
   if (el) window.scrollTo({ top: el.offsetTop - 90, behavior: 'smooth' })
+}
+
+function openVisitas() {
+  window.open('https://altanorte.overclic.com/#/visitas', '_blank', 'noopener')
 }
 
 function handleParallax() {
