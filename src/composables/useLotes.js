@@ -113,6 +113,12 @@ async function loadLotes() {
   }
 }
 
+// El público solo ve dos estados; el admin conserva el detalle (APARTADO/RESERVADO/VENDIDO)
+export function estatusVisible(estatus, isAdmin) {
+  if (isAdmin || estatus === 'DISPONIBLE') return estatus
+  return 'NO DISPONIBLE'
+}
+
 export async function setLoteEstatus(manzana, loteNum, estatus) {
   if (supabase) {
     const { error } = await supabase

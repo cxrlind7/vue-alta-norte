@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick, watch } from 'vue'
 import Panzoom from '@panzoom/panzoom'
-import { useLotes, refreshReservations } from '../composables/useLotes.js'
+import { useLotes, refreshReservations, estatusVisible } from '../composables/useLotes.js'
 import { useAdminState } from '../composables/useAdminState.js'
 import CotizacionModal from './CotizacionModal.vue'
 
@@ -121,9 +121,15 @@ const STATUS_COLOR = {
   RESERVADO:  { fill: '#94a3b8', stroke: '#64748b', opacity: '1', text: '#1e293b' },
   VENDIDO:    { fill: '#ef4444', stroke: '#dc2626', opacity: '1', text: '#7f1d1d' },
 }
+const PUBLIC_STATUS_COLOR = {
+  DISPONIBLE:      STATUS_COLOR.DISPONIBLE,
+  'NO DISPONIBLE': STATUS_COLOR.VENDIDO,
+}
+const legendColors = computed(() => isAdmin.value ? STATUS_COLOR : PUBLIC_STATUS_COLOR)
 
 function statusColor(estatus) {
-  return STATUS_COLOR[estatus] || STATUS_COLOR.RESERVADO
+  const visible = estatusVisible(estatus, isAdmin.value)
+  return legendColors.value[visible] || STATUS_COLOR.RESERVADO
 }
 
 function applyStatusColors() {
@@ -213,6 +219,8 @@ watch(lotes, (v) => {
   _lotesCache = v          // update plain cache — no reactive access in mousemove
   nextTick(applyStatusColors)
 }, { immediate: true, deep: true })
+
+watch(isAdmin, () => nextTick(applyStatusColors))
 
 let _clickPending = false
 function handleClick(e) {
@@ -331,7 +339,7 @@ function fmtArea(v) {
 
     <!-- ─── Legend ────────────────────────────────────────────────────────── -->
     <div class="absolute top-3 left-3 z-20 flex flex-col gap-1.5 bg-black/40 backdrop-blur-sm rounded-xl px-3 py-2.5 text-xs">
-      <div v-for="(col, status) in STATUS_COLOR" :key="status" class="flex items-center gap-1.5">
+      <div v-for="(col, status) in legendColors" :key="status" class="flex items-center gap-1.5">
         <div class="w-3.5 h-3 rounded-sm border"
           :style="`background:${col.fill};border-color:${col.stroke};opacity:${col.opacity}`"></div>
         <span class="text-white/80 font-medium">{{ status }}</span>
@@ -433,7 +441,7 @@ function fmtArea(v) {
                 <span class="text-slate-500">Estatus</span>
                 <span class="text-[11px] font-black px-2 py-0.5 rounded-full"
                   :style="`background:${statusColor(hoveredLote.lote.estatus).fill}25;color:${statusColor(hoveredLote.lote.estatus).stroke}`">
-                  {{ hoveredLote.lote.estatus }}
+                  {{ estatusVisible(hoveredLote.lote.estatus, isAdmin) }}
                 </span>
               </div>
             </div>

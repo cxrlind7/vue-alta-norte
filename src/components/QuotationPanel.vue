@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useLotes, setLoteEstatus, refreshReservations } from '../composables/useLotes.js'
+import { useLotes, setLoteEstatus, refreshReservations, estatusVisible } from '../composables/useLotes.js'
 import CotizacionModal from './CotizacionModal.vue'
 import { useAdminState } from '../composables/useAdminState'
 
@@ -76,10 +76,11 @@ const STATUS_STYLE = {
   APARTADO:   'bg-amber-100  text-amber-700  border-amber-200',
   RESERVADO:  'bg-slate-100  text-slate-500  border-slate-200',
   VENDIDO:    'bg-red-100    text-red-600    border-red-200',
+  'NO DISPONIBLE': 'bg-red-100 text-red-600 border-red-200',
 }
 
 function statusStyle(estatus) {
-  return STATUS_STYLE[estatus] || 'bg-gray-100 text-gray-500 border-gray-200'
+  return STATUS_STYLE[estatusVisible(estatus, isAdmin.value)] || 'bg-gray-100 text-gray-500 border-gray-200'
 }
 
 function selectLote(lote) {
@@ -171,7 +172,7 @@ const totalPrice = computed(() => {
                 ? 'bg-white/20 border-white/30 text-white'
                 : statusStyle(lote.estatus)
             ]">
-              {{ lote.estatus }}
+              {{ estatusVisible(lote.estatus, isAdmin) }}
             </span>
           </div>
         </button>
